@@ -1,9 +1,16 @@
 package org.acme.schooltimetabling.rest;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.acme.schooltimetabling.domain.TimeTable;
 import org.acme.schooltimetabling.persistence.TimeTableRepository;
+import org.optaplanner.core.api.score.Score;
+import org.optaplanner.core.api.score.ScoreExplanation;
 import org.optaplanner.core.api.score.ScoreManager;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
+import org.optaplanner.core.api.score.constraint.ConstraintMatchTotal;
 import org.optaplanner.core.api.solver.SolverManager;
 import org.optaplanner.core.api.solver.SolverStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +38,15 @@ public class TimeTableController {
         SolverStatus solverStatus = getSolverStatus();
         TimeTable solution = timeTableRepository.findById(TimeTableRepository.SINGLETON_TIME_TABLE_ID);
         scoreManager.updateScore(solution); // Sets the score
+        ScoreExplanation<TimeTable, HardSoftScore> scoreExplanation = scoreManager.explainScore(solution);
+
+        Map<String,ConstraintMatchTotal<HardSoftScore>> constraintMatchTotals = scoreExplanation.getConstraintMatchTotalMap();
+        for (String constraintMatchTotal : constraintMatchTotals.keySet()) {
+            System.out.println("ConstraintMatchTotal: " + constraintMatchTotal);
+            System.out.println("Score: " + constraintMatchTotals.get(constraintMatchTotal).getScore());
+        }
+    
+
         solution.setSolverStatus(solverStatus);
         return solution;
     }

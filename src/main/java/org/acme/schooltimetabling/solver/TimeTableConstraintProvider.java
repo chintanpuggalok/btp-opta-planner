@@ -171,7 +171,8 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "math", 3),
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "des", 3),
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "bio", 3),
-                avoidHighStrengthLessonsInSameTimeSlot(constraintFactory)
+                // avoidHighStrengthLessonsInSameTimeSlot(constraintFactory),
+                // minLessonsPerTimeslot(constraintFactory, 7),
 
                 
                 
@@ -244,6 +245,13 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .filter((timeslot, count) -> count > max)
                 .penalize(HardSoftScore.ONE_HARD).asConstraint("Max lessons per timeslot");
     }
+    public Constraint minLessonsPerTimeslot(ConstraintFactory factory, int min) {
+        UniConstraintCollector<Lesson, ?, Integer> slotCollector = ConstraintCollectors.count();
+        return factory.forEach(Lesson.class)
+                .groupBy(Lesson::getTimeslot, slotCollector)
+                .filter((timeslot, count) -> count < min)
+                .penalize(HardSoftScore.ONE_HARD).asConstraint("Min lessons per timeslot");
+    }
 
     public Constraint maxLessonsPerDepartmentPerTimeslot(ConstraintFactory factory, String department, int max) {
         UniConstraintCollector<Lesson, ?, Integer> countCollector = ConstraintCollectors.count();
@@ -252,8 +260,8 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .filter(lesson -> lesson.getDepartment().equals(department))
                 .groupBy(Lesson::getTimeslot, countCollector)
                 .filter((timeslot, count) -> count >= max)
-                .penalize(HardSoftScore.ONE_HARD)
-                .asConstraint("Min lessons per department per timeslot in" + department);
+                .penalize(HardSoftScore.ONE_SOFT)
+                .asConstraint("Max lessons per department per timeslot in" + department);
     }
 
     public Constraint noCourseRepeatOnSameDay(ConstraintFactory factory) {
