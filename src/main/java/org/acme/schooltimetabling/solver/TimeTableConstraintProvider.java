@@ -128,31 +128,42 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         setBucketList();
         List<LocalTime> startTimeList =List.of(LocalTime.of(9, 30),LocalTime.of(11,0),LocalTime.of(15,0),LocalTime.of(16,30));
         List<LocalTime> endTimeList =List.of(LocalTime.of(11, 0),LocalTime.of(12,30),LocalTime.of(16,30),LocalTime.of(18,0));
-        Constraint[] slotConstraints = new Constraint[9];
-        for(int i=0;i<4;i++)
+        Constraint[] slotConstraints = new Constraint[18];
+        for(int k=0;k<8;k++)
         {
+            int i=k/2;
             DayOfWeek nextDay=DayOfWeek.WEDNESDAY;
             if(i==0)
                 nextDay=DayOfWeek.THURSDAY;
-            slotConstraints[i]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+            slotConstraints[2*i]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
                 new Timeslot(DayOfWeek.MONDAY,startTimeList.get(i),endTimeList.get(i)),
                 new Timeslot(nextDay,startTimeList.get(i),endTimeList.get(i)));
+            slotConstraints[2*i+1]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                new Timeslot(nextDay,startTimeList.get(i),endTimeList.get(i)),
+                new Timeslot(DayOfWeek.MONDAY,startTimeList.get(i),endTimeList.get(i)));
         
         }
-        for(int i=0;i<4;i++)
+        for(int k=0;k<8;k++)
         {
             DayOfWeek nextDay=DayOfWeek.THURSDAY;
+            int i=k/2;
             if(i==0)
                 nextDay=DayOfWeek.FRIDAY;
 
-            slotConstraints[i+4]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+            slotConstraints[2*i+8]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
                 new Timeslot(DayOfWeek.TUESDAY,startTimeList.get(i),endTimeList.get(i)),
                 new Timeslot(nextDay,startTimeList.get(i),endTimeList.get(i)));
+            slotConstraints[2*i+9]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                new Timeslot(nextDay,startTimeList.get(i),endTimeList.get(i)),
+                new Timeslot(DayOfWeek.TUESDAY,startTimeList.get(i),endTimeList.get(i)));
         
         }
-        slotConstraints[8]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+        slotConstraints[16]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
                 new Timeslot(DayOfWeek.WEDNESDAY,startTimeList.get(0),endTimeList.get(0)),
                 new Timeslot(DayOfWeek.FRIDAY,startTimeList.get(1),endTimeList.get(1)));
+        slotConstraints[17]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                new Timeslot(DayOfWeek.FRIDAY,startTimeList.get(1),endTimeList.get(1)),
+                new Timeslot(DayOfWeek.WEDNESDAY,startTimeList.get(0),endTimeList.get(0)));
         
 
         Constraint[] otherConstraints= new Constraint[] {
@@ -166,11 +177,11 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 maxLessonsPerTimeslot(constraintFactory, 9),
                 // minLessonsPerDepartmentPerTimeslot(constraintFactory, "cse", 2),
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "cse", 4),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "ece", 4),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "ece", 3),
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "other", 4),
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "math", 3),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "des", 3),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "bio", 3),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "des", 2),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "bio", 2),
                 // avoidHighStrengthLessonsInSameTimeSlot(constraintFactory),
                 // minLessonsPerTimeslot(constraintFactory, 7),
 
@@ -186,8 +197,8 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
             .filter(lesson -> lesson.getTimeslot().equals(a))
             .ifNotExists(Lesson.class,
                 Joiners.equal(Lesson::getSubject, Lesson::getSubject),
-                Joiners.filtering((lessonA, lessonB) -> lessonB.getTimeslot().equals(b) &&
-                                                        lessonA.getRoom().equals(lessonB.getRoom())))
+                Joiners.equal(Lesson::getTeacher, Lesson::getTeacher),
+                Joiners.filtering((lessonA, lessonB) -> lessonB.getTimeslot().equals(b)))
             .penalize( HardSoftScore.ONE_HARD).asConstraint("Ensure time slot B is copy of time slot A with different subject penalty"+a.getDayOfWeek()+a.getStartTime()+a.getEndTime());
     }
     
@@ -254,7 +265,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
     }
 
     public Constraint maxLessonsPerDepartmentPerTimeslot(ConstraintFactory factory, String department, int max) {
-        UniConstraintCollector<Lesson, ?, Integer> countCollector = ConstraintCollectors.count();
+        UniConstraintCollector<Lesson, ?, Integer> countCollector = ConstraintCollectors.countDistinct(Lesson::getSubject);
 
         return factory.forEach(Lesson.class)
                 .filter(lesson -> lesson.getDepartment().equals(department))

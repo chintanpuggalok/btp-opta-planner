@@ -105,7 +105,7 @@ public class TimeTableSpringBootApp {
                     else
                         dept = "other";
                     char section = 'A';
-                    for(int i=0;i<subjectDataList.size();i++){
+                    for(int i=0;i<2;i++){
                         String secString=String.valueOf(section+i);
                         for(String[] subjectDataArray:subjectDataList){
                             Lesson subject = new Lesson(subjectDataArray[0], subjectDataArray[2], "",

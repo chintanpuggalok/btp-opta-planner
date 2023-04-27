@@ -16,19 +16,19 @@ function refreshTimeTable() {
       if(lesson.timeslot && lesson.timeslot.id && lesson.timeslot.id in slotDepartmentFrequency){
         departmentFrequency = slotDepartmentFrequency[lesson.timeslot.id];
       }
-      if(lesson.strength<90)
-      {
-        if(lesson.strength in departmentFrequency)
-        deptfreq+=departmentFrequency[lesson.strength];
-        departmentFrequency[lesson.strength]=deptfreq;
+      // if(lesson.strength<90)
+      // {
+        if(lesson.department in departmentFrequency)
+        deptfreq+=departmentFrequency[lesson.department];
+        departmentFrequency[lesson.department]=deptfreq;
 
-      }
-      else
-      {
-        if(90 in departmentFrequency)
-        deptfreq+=departmentFrequency[90];
-        departmentFrequency[90]=deptfreq;
-      }
+      // }
+      // else
+      // {
+      //   if(90 in departmentFrequency)
+      //   deptfreq+=departmentFrequency[90];
+      //   departmentFrequency[90]=deptfreq;
+      // }
       
       slotDepartmentFrequency[lesson.timeslot.id]=departmentFrequency;
     }
