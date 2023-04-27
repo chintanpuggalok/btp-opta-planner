@@ -105,11 +105,11 @@ public class TimeTableSpringBootApp {
                     else
                         dept = "other";
                     char section = 'A';
-                    for(int i=0;i<subjectDataList.size();i++){
-                        String secString=String.valueOf(section+i);
-                        for(String[] subjectDataArray:subjectDataList){
+                    for (int i = 0; i < subjectDataList.size(); i++) {
+                        String secString = String.valueOf(section + i);
+                        for (String[] subjectDataArray : subjectDataList) {
                             Lesson subject = new Lesson(subjectDataArray[0], subjectDataArray[2], "",
-                            Integer.valueOf(subjectDataArray[1]), dept,secString);
+                                    Integer.valueOf(subjectDataArray[1]), dept, secString);
                             subjectList.add(subject);
                         }
                     }
@@ -119,7 +119,6 @@ public class TimeTableSpringBootApp {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return subjectList;
     }
 

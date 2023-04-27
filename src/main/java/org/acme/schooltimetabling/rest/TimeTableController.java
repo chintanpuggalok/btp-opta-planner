@@ -40,12 +40,12 @@ public class TimeTableController {
         scoreManager.updateScore(solution); // Sets the score
         ScoreExplanation<TimeTable, HardSoftScore> scoreExplanation = scoreManager.explainScore(solution);
 
-        Map<String,ConstraintMatchTotal<HardSoftScore>> constraintMatchTotals = scoreExplanation.getConstraintMatchTotalMap();
+        Map<String, ConstraintMatchTotal<HardSoftScore>> constraintMatchTotals = scoreExplanation
+                .getConstraintMatchTotalMap();
         for (String constraintMatchTotal : constraintMatchTotals.keySet()) {
             System.out.println("ConstraintMatchTotal: " + constraintMatchTotal);
             System.out.println("Score: " + constraintMatchTotals.get(constraintMatchTotal).getScore());
         }
-    
 
         solution.setSolverStatus(solverStatus);
         return solution;
