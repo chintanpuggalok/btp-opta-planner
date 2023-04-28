@@ -158,7 +158,7 @@ function convertToId(str) {
 }
 
 function solve() {
-  $.post("/timeTable/solve", function () {
+  $.post("/timeTable/solve",JSON.stringify({"hello":"hello"}) ,function () {
     refreshSolvingButtons(true);
   }).fail(function (xhr, ajaxOptions, thrownError) {
     showError("Start solving failed.", xhr);

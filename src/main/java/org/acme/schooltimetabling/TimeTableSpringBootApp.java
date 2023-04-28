@@ -150,9 +150,10 @@ public class TimeTableSpringBootApp {
                 LocalTime.of(16, 30));
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                timeslotRepository.save(new Timeslot(DayOfWeek.of(i + 1), startTimeList.get(j),
+                Timeslot s= timeslotRepository.save(new Timeslot(DayOfWeek.of(i + 1), startTimeList.get(j),
                         startTimeList.get(j).plusHours(1).plusMinutes(30)));
-            }
+                // System.out.println(s.getId());
+                    }
         }
         timeslotRepository.save(new Timeslot(DayOfWeek.of(5), LocalTime.of(9, 30), LocalTime.of(11, 0)));
         timeslotRepository.save(new Timeslot(DayOfWeek.of(5), LocalTime.of(11, 0), LocalTime.of(12, 30)));
@@ -188,14 +189,14 @@ public class TimeTableSpringBootApp {
             }
             createSlots(timeslotRepository);
             createRooms(roomRepository);
-            createLessons(lessonRepository);
+            // createLessons(lessonRepository);
             // setBucketList();
 
-            Lesson lesson = lessonRepository.findAll(Sort.by("id")).iterator().next();
-            lesson.setTimeslot(timeslotRepository.findAll(Sort.by("id")).iterator().next());
-            lesson.setRoom(roomRepository.findAll(Sort.by("id")).iterator().next());
+            // Lesson lesson = lessonRepository.findAll(Sort.by("id")).iterator().next();
+            // lesson.setTimeslot(timeslotRepository.findAll(Sort.by("id")).iterator().next());
+            // lesson.setRoom(roomRepository.findAll(Sort.by("id")).iterator().next());
 
-            lessonRepository.save(lesson);
+            // lessonRepository.save(lesson);
         };
     }
 
