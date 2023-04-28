@@ -32,13 +32,13 @@ import org.acme.schooltimetabling.domain.Timeslot;
 
 public class TimeTableConstraintProvider implements ConstraintProvider {
     private List<Set<String>> subjectSets;
-    List<HashSet<String>> setBucketList()
-    {
+
+    List<HashSet<String>> setBucketList() {
         String line = "";
         String splitBy = ",";
         BufferedReader br;
         try {
-             br = new BufferedReader(new FileReader("subject_bucket_list.csv"));
+            br = new BufferedReader(new FileReader("subject_bucket_list.csv"));
             br.readLine();
             List<Set<String>> bucketList = new ArrayList<>();
             HashSet<String> bucket = new HashSet<>();
@@ -47,164 +47,148 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
             while ((line = br.readLine()) != null) // returns a Boolean value
             {
                 String[] subjectDetails = line.split(splitBy);
-                if(subjectDetails.length==1)
-                {
+                if (subjectDetails.length == 1) {
                     // bucketList.add(bucket);
-                    for(HashSet<String> set: seriesBuckets)
-                    {
-                        if(set.size()>0)
-                        {
+                    for (HashSet<String> set : seriesBuckets) {
+                        if (set.size() > 0) {
 
                             bucketList.add(set);
                         }
                     }
                     bucket = new HashSet<>();
-                    seriesBuckets= new ArrayList<>();
+                    seriesBuckets = new ArrayList<>();
                     seriesBuckets.add(bucket);
                     continue;
-                }
-                else if(subjectDetails.length>=2)
-                {
-                    if(subjectDetails.length==2)
-                    {
-                        for(HashSet<String> set: seriesBuckets)
-                        {
+                } else if (subjectDetails.length >= 2) {
+                    if (subjectDetails.length == 2) {
+                        for (HashSet<String> set : seriesBuckets) {
                             set.add(subjectDetails[1]);
                         }
-                    }
-                    else
-                    {
-                        int multiplier=subjectDetails.length-1;
+                    } else {
+                        int multiplier = subjectDetails.length - 1;
                         List<HashSet<String>> newSeriesBuckets = new ArrayList<>();
-                        for(int i=0;i<multiplier;i++)
-                        {
-                            
-                            for(HashSet<String> set: seriesBuckets)
-                            {
+                        for (int i = 0; i < multiplier; i++) {
+
+                            for (HashSet<String> set : seriesBuckets) {
                                 newSeriesBuckets.add((HashSet<String>) set.clone());
                             }
                         }
                         // for(int i=0;i<multiplier;i++)
                         // {
-                        //     for(int j=1;j<subjectDetails.length;j++)
-                        //     {
-                        //         newSeriesBuckets.get(i*multiplier+j-1 ).add(subjectDetails[j]);
-                        //     }
+                        // for(int j=1;j<subjectDetails.length;j++)
+                        // {
+                        // newSeriesBuckets.get(i*multiplier+j-1 ).add(subjectDetails[j]);
                         // }
-                        int sub=0;
-                        for(int i=0;i<newSeriesBuckets.size();i++,sub++)
-                        {
-                            sub=sub%multiplier;
-                            newSeriesBuckets.get(i).add(subjectDetails[sub+1]);
+                        // }
+                        int sub = 0;
+                        for (int i = 0; i < newSeriesBuckets.size(); i++, sub++) {
+                            sub = sub % multiplier;
+                            newSeriesBuckets.get(i).add(subjectDetails[sub + 1]);
                         }
-                        seriesBuckets=newSeriesBuckets;
+                        seriesBuckets = newSeriesBuckets;
 
                     }
-                
+
+                }
             }
-        }
 
             br.close();
             // return bucketList;
-            this.subjectSets=bucketList;
-            
+            this.subjectSets = bucketList;
+
         } catch (Exception e) {
-            
+
             System.out.println(e.getMessage());
             // TODO: handle exception
         }
-        return null; 
-        
-
+        return null;
 
     }
 
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
 
-        // subjectSets =  TimeTableSpringBootApp.getbucketList();
+        // subjectSets = TimeTableSpringBootApp.getbucketList();
         // subjectSets.add(Set.of("Math","Chemistry","Biology"));
         // Map<String, Integer> minLessonCount = Map.of("cse",2,"ece",1);
         setBucketList();
-        List<LocalTime> startTimeList =List.of(LocalTime.of(9, 30),LocalTime.of(11,0),LocalTime.of(15,0),LocalTime.of(16,30));
-        List<LocalTime> endTimeList =List.of(LocalTime.of(11, 0),LocalTime.of(12,30),LocalTime.of(16,30),LocalTime.of(18,0));
-        Constraint[] slotConstraints = new Constraint[18];
-        for(int k=0;k<8;k++)
-        {
-            int i=k/2;
-            DayOfWeek nextDay=DayOfWeek.WEDNESDAY;
-            if(i==0)
-                nextDay=DayOfWeek.THURSDAY;
-            slotConstraints[2*i]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
-                new Timeslot(DayOfWeek.MONDAY,startTimeList.get(i),endTimeList.get(i)),
-                new Timeslot(nextDay,startTimeList.get(i),endTimeList.get(i)));
-            slotConstraints[2*i+1]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
-                new Timeslot(nextDay,startTimeList.get(i),endTimeList.get(i)),
-                new Timeslot(DayOfWeek.MONDAY,startTimeList.get(i),endTimeList.get(i)));
-        
-        }
-        for(int k=0;k<8;k++)
-        {
-            DayOfWeek nextDay=DayOfWeek.THURSDAY;
-            int i=k/2;
-            if(i==0)
-                nextDay=DayOfWeek.FRIDAY;
+        List<LocalTime> startTimeList = List.of(LocalTime.of(9, 00), LocalTime.of(10, 30), LocalTime.of(12, 00),
+                LocalTime.of(14, 30),
+                LocalTime.of(16, 00));
+        List<LocalTime> endTimeList = List.of(LocalTime.of(10, 30), LocalTime.of(12, 00), LocalTime.of(13, 30),
+                LocalTime.of(16, 00),
+                LocalTime.of(17, 30));
+        Constraint[] slotConstraints = new Constraint[22];
+        for (int k = 0; k < 10; k++) {
+            int i = k / 2;
+            DayOfWeek nextDay = DayOfWeek.WEDNESDAY;
+            if (i == 0)
+                nextDay = DayOfWeek.THURSDAY;
+            slotConstraints[2 * i] = ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                    new Timeslot(DayOfWeek.MONDAY, startTimeList.get(i), endTimeList.get(i)),
+                    new Timeslot(nextDay, startTimeList.get(i), endTimeList.get(i)));
+            slotConstraints[2 * i + 1] = ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                    new Timeslot(nextDay, startTimeList.get(i), endTimeList.get(i)),
+                    new Timeslot(DayOfWeek.MONDAY, startTimeList.get(i), endTimeList.get(i)));
 
-            slotConstraints[2*i+8]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
-                new Timeslot(DayOfWeek.TUESDAY,startTimeList.get(i),endTimeList.get(i)),
-                new Timeslot(nextDay,startTimeList.get(i),endTimeList.get(i)));
-            slotConstraints[2*i+9]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
-                new Timeslot(nextDay,startTimeList.get(i),endTimeList.get(i)),
-                new Timeslot(DayOfWeek.TUESDAY,startTimeList.get(i),endTimeList.get(i)));
-        
         }
-        slotConstraints[16]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
-                new Timeslot(DayOfWeek.WEDNESDAY,startTimeList.get(0),endTimeList.get(0)),
-                new Timeslot(DayOfWeek.FRIDAY,startTimeList.get(1),endTimeList.get(1)));
-        slotConstraints[17]= ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
-                new Timeslot(DayOfWeek.FRIDAY,startTimeList.get(1),endTimeList.get(1)),
-                new Timeslot(DayOfWeek.WEDNESDAY,startTimeList.get(0),endTimeList.get(0)));
-        
+        for (int k = 0; k < 10; k++) {
+            DayOfWeek nextDay = DayOfWeek.THURSDAY;
+            int i = k / 2;
+            if (i == 0)
+                nextDay = DayOfWeek.FRIDAY;
 
-        Constraint[] otherConstraints= new Constraint[] {
+            slotConstraints[2 * i + 10] = ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                    new Timeslot(DayOfWeek.TUESDAY, startTimeList.get(i), endTimeList.get(i)),
+                    new Timeslot(nextDay, startTimeList.get(i), endTimeList.get(i)));
+            slotConstraints[2 * i + 11] = ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                    new Timeslot(nextDay, startTimeList.get(i), endTimeList.get(i)),
+                    new Timeslot(DayOfWeek.TUESDAY, startTimeList.get(i), endTimeList.get(i)));
+
+        }
+        slotConstraints[20] = ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                new Timeslot(DayOfWeek.WEDNESDAY, startTimeList.get(0), endTimeList.get(0)),
+                new Timeslot(DayOfWeek.FRIDAY, startTimeList.get(1), endTimeList.get(1)));
+        slotConstraints[21] = ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(constraintFactory,
+                new Timeslot(DayOfWeek.FRIDAY, startTimeList.get(1), endTimeList.get(1)),
+                new Timeslot(DayOfWeek.WEDNESDAY, startTimeList.get(0), endTimeList.get(0)));
+
+        Constraint[] otherConstraints = new Constraint[] {
                 // Hard constraints
                 roomConflict(constraintFactory),
                 teacherConflict(constraintFactory),
                 noCourseRepeatOnSameDay(constraintFactory),
+                // sameSubjectDifferentSectionConstraint(constraintFactory),
                 sameTimeslotSubjectSetConstraint(constraintFactory),
-                sameSubjectDifferentSectionConstraint(constraintFactory),
                 roomCapacityConstraint(constraintFactory),
-                maxLessonsPerTimeslot(constraintFactory, 9),
+                maxLessonsPerTimeslot(constraintFactory, 15),
                 // minLessonsPerDepartmentPerTimeslot(constraintFactory, "cse", 2),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "cse", 4),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "ece", 3),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "other", 4),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "math", 3),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "des", 2),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "bio", 2),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "cse", 8),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "ece", 8),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "other", 6),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "math", 7),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "des", 5),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "bio", 5),
                 // avoidHighStrengthLessonsInSameTimeSlot(constraintFactory),
                 // minLessonsPerTimeslot(constraintFactory, 7),
 
-                
-                
-
         };
-        return Stream.concat(Stream.of(slotConstraints),Stream.of(otherConstraints)).toArray(Constraint[]::new);
+        return Stream.concat(Stream.of(slotConstraints), Stream.of(otherConstraints)).toArray(Constraint[]::new);
     }
 
-    private Constraint ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(ConstraintFactory constraintFactory,Timeslot a,Timeslot b) {
+    private Constraint ensureTimeSlotBIsCopyOfTimeSlotAWithDifferentSubjectPenalty(ConstraintFactory constraintFactory,
+            Timeslot a, Timeslot b) {
         return constraintFactory.forEach(Lesson.class)
-            .filter(lesson -> lesson.getTimeslot().equals(a))
-            .ifNotExists(Lesson.class,
-                Joiners.equal(Lesson::getSubject, Lesson::getSubject),
-                Joiners.equal(Lesson::getTeacher, Lesson::getTeacher),
-                Joiners.filtering((lessonA, lessonB) -> lessonB.getTimeslot().equals(b)))
-            .penalize( HardSoftScore.ONE_HARD).asConstraint("Ensure time slot B is copy of time slot A with different subject penalty"+a.getDayOfWeek()+a.getStartTime()+a.getEndTime());
+                .filter(lesson -> lesson.getTimeslot().equals(a))
+                .ifNotExists(Lesson.class,
+                        Joiners.equal(Lesson::getSubject, Lesson::getSubject),
+                        Joiners.equal(Lesson::getTeacher, Lesson::getTeacher),
+                        Joiners.filtering((lessonA, lessonB) -> lessonB.getTimeslot().equals(b)
+                                && lessonA.getRoom().equals(lessonB.getRoom())))
+                .penalize(HardSoftScore.ONE_HARD)
+                .asConstraint("Ensure time slot B is copy of time slot A with different subject penalty"
+                        + a.getDayOfWeek() + a.getStartTime() + a.getEndTime());
     }
-    
-    
-    
-    
 
     Constraint roomConflict(ConstraintFactory constraintFactory) {
         // A room can accommodate at most one lesson at the same time.
@@ -256,6 +240,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .filter((timeslot, count) -> count > max)
                 .penalize(HardSoftScore.ONE_HARD).asConstraint("Max lessons per timeslot");
     }
+
     public Constraint minLessonsPerTimeslot(ConstraintFactory factory, int min) {
         UniConstraintCollector<Lesson, ?, Integer> slotCollector = ConstraintCollectors.count();
         return factory.forEach(Lesson.class)
@@ -265,7 +250,8 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
     }
 
     public Constraint maxLessonsPerDepartmentPerTimeslot(ConstraintFactory factory, String department, int max) {
-        UniConstraintCollector<Lesson, ?, Integer> countCollector = ConstraintCollectors.countDistinct(Lesson::getSubject);
+        UniConstraintCollector<Lesson, ?, Integer> countCollector = ConstraintCollectors
+                .countDistinct(Lesson::getSubject);
 
         return factory.forEach(Lesson.class)
                 .filter(lesson -> lesson.getDepartment().equals(department))
@@ -302,14 +288,15 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         }
         return false;
     }
+
     private Constraint avoidHighStrengthLessonsInSameTimeSlot(ConstraintFactory constraintFactory) {
         return constraintFactory.forEach(Lesson.class)
-            .filter(lesson -> lesson.getStrength() > 100)
-            .join(Lesson.class,
-                Joiners.equal(Lesson::getTimeslot),
-                Joiners.lessThan(Lesson::getId),
-                Joiners.filtering((lesson, otherLesson) -> otherLesson.getStrength() > 90))
-            .penalize( HardSoftScore.ONE_SOFT).asConstraint("avoidHighStrengthLessonsInSameTimeSlot");
+                .filter(lesson -> lesson.getStrength() > 100)
+                .join(Lesson.class,
+                        Joiners.equal(Lesson::getTimeslot),
+                        Joiners.lessThan(Lesson::getId),
+                        Joiners.filtering((lesson, otherLesson) -> otherLesson.getStrength() > 90))
+                .penalize(HardSoftScore.ONE_SOFT).asConstraint("avoidHighStrengthLessonsInSameTimeSlot");
     }
 
 }

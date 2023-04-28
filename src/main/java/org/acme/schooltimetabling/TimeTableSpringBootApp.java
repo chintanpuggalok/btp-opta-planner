@@ -105,11 +105,11 @@ public class TimeTableSpringBootApp {
                     else
                         dept = "other";
                     char section = 'A';
-                    for(int i=0;i<2;i++){
-                        String secString=String.valueOf(section+i);
-                        for(String[] subjectDataArray:subjectDataList){
+                    for (int i = 0; i < 2; i++) {
+                        String secString = String.valueOf(section + i);
+                        for (String[] subjectDataArray : subjectDataList) {
                             Lesson subject = new Lesson(subjectDataArray[0], subjectDataArray[2], "",
-                            Integer.valueOf(subjectDataArray[1]), dept,secString);
+                                    Integer.valueOf(subjectDataArray[1]), dept, secString);
                             subjectList.add(subject);
                         }
                     }
@@ -146,24 +146,23 @@ public class TimeTableSpringBootApp {
     }
 
     public void createSlots(TimeslotRepository timeslotRepository) {
-        List<LocalTime> startTimeList = List.of(LocalTime.of(9, 30), LocalTime.of(11, 0), LocalTime.of(15, 0),
-                LocalTime.of(16, 30));
+        List<LocalTime> startTimeList = List.of(LocalTime.of(9, 00), LocalTime.of(10, 30), LocalTime.of(12, 00),
+                LocalTime.of(14, 30),
+                LocalTime.of(16, 00));
         for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
+            for (int j = 0; j < 5; j++) {
                 timeslotRepository.save(new Timeslot(DayOfWeek.of(i + 1), startTimeList.get(j),
                         startTimeList.get(j).plusHours(1).plusMinutes(30)));
             }
         }
-        timeslotRepository.save(new Timeslot(DayOfWeek.of(5), LocalTime.of(9, 30), LocalTime.of(11, 0)));
-        timeslotRepository.save(new Timeslot(DayOfWeek.of(5), LocalTime.of(11, 0), LocalTime.of(12, 30)));
-
+        timeslotRepository.save(new Timeslot(DayOfWeek.of(5), LocalTime.of(9, 00), LocalTime.of(10, 30)));
+        timeslotRepository.save(new Timeslot(DayOfWeek.of(5), LocalTime.of(10, 30), LocalTime.of(12, 00)));
     }
 
     public void createLessons(LessonRepository lessonRepository) {
         List<Lesson> subjectList = getSubjects();
         for (Lesson subject : subjectList) {
             lessonRepository.save(subject);
-
         }
     }
 

@@ -3,7 +3,7 @@ const dateTimeFormatter = JSJoda.DateTimeFormatter.ofPattern('HH:mm')
 
 function refreshTimeTable() {
   $.getJSON("/timeTable", function (timeTable) {
-    // console.log(timeTable);
+    console.log(timeTable);
     refreshSolvingButtons(timeTable.solverStatus != null && timeTable.solverStatus !== "NOT_SOLVING");
     $("#score").text("Score: " + (timeTable.score == null ? "?" : timeTable.score));
     let slotDepartmentFrequency = {};
@@ -33,7 +33,7 @@ function refreshTimeTable() {
       slotDepartmentFrequency[lesson.timeslot.id]=departmentFrequency;
     }
      })
-    console.log(slotDepartmentFrequency);
+    // console.log(slotDepartmentFrequency);
 
     const timeTableByRoom = $("#timeTableByRoom");
     timeTableByRoom.children().remove();
