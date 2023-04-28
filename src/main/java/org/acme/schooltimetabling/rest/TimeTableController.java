@@ -1,5 +1,5 @@
 package org.acme.schooltimetabling.rest;
-
+//todo add same day check and bucketlist check
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
 @RestController
@@ -55,6 +56,7 @@ public class TimeTableController {
     private SolverManager<TimeTable, Long> solverManager;
     @Autowired
     private ScoreManager<TimeTable, HardSoftScore> scoreManager;
+    List<Lesson> subjectList=new ArrayList<>();
     static List<Lesson> getSubjects(ArrayList<HashMap<String,Object>> inputSubjectList) {
         String line = "";
         String splitBy = ",";
@@ -155,7 +157,7 @@ public class TimeTableController {
     }
 
     public void createLessons(ArrayList<HashMap<String,Object>> inputSubjectList) {
-        List<Lesson> subjectList = getSubjects(inputSubjectList);
+        subjectList = getSubjects(inputSubjectList);
         for (Lesson subject : subjectList) {
             lessonRepository.save(subject);
 
@@ -395,6 +397,86 @@ public class TimeTableController {
 			System.out.println(ex);
 		}
 		return null;
+	}
+
+    @CrossOrigin(maxAge = 3600)
+	@PostMapping("/checkTimeTable")
+	// @JsonProperty(value = "timetable")
+	public ResponseEntity getTT(@RequestBody String timetable) {
+		// HashMap<String, String> map = new HashMap<>();
+		// JSONObject jsono = new JSONObject(timetable);
+		Gson gson = new Gson();
+		HashMap<String, ArrayList<ArrayList<String>>> temp2 = gson.fromJson(timetable, HashMap.class);
+		// System.out.println(timetable);
+		// JSONArray t = new JSONArray(timetable.get("timetable"));
+		ArrayList<ArrayList<String>> tempt = temp2.get("timetable");
+		// String[][].class);
+		// System.out.println(jsono.get("tiemtable"));
+		// JSONArray json = new JSONArray(timetable.get("timetable"));
+		// String[][] array = new String[json.length()][];
+		// JSONArray.
+
+		// map.put("status", "");
+		String[][] ttvalues = tempt.stream().map(u -> u.toArray(new String[0])).toArray(String[][]::new);
+		System.out.println(ttvalues[0][0]);
+		// ttvalues = temp;
+        HashMap<String, Lesson> subMap = new HashMap<>();
+		HashMap<String, String> map = new HashMap<>();
+
+		for (Lesson c : subjectList) {
+			subMap.put(c.getSubject(), c);
+		}
+
+		for (int i = 0; i < ttvalues.length; i++) {
+			for (int j = 0; j < ttvalues[0].length; j++) {
+				String[] arrOfStr = ttvalues[i][j].split("\n");
+				String key = Integer.toString(i) + "," + Integer.toString(j);
+				HashMap<String, String> codeHashMap = new HashMap<>();
+				HashMap<String, String> roomHashMap = new HashMap<>();
+				HashMap<String, String> profHashMap = new HashMap<>();
+				for (String a : arrOfStr) {
+					String[] courseCode = a.split(":");
+					System.out.println(courseCode[0]);
+					Lesson tmp = subMap.get(courseCode[0]);
+					if (codeHashMap.containsKey(tmp.getSubject())) {
+						if (!map.containsKey(key))
+							map.put(key, "Course Common: " + codeHashMap.get(tmp.getSubject()) + "-" + a);
+						else
+							map.put(key,
+									map.get(key) + ", Course Common: " + codeHashMap.get(tmp.getSubject()) + "-" + a);
+					} else {
+						codeHashMap.put(tmp.getSubject(), a);
+					}
+
+					if (roomHashMap.containsKey(tmp.getRoom().getName())) {
+						if (!map.containsKey(key))
+							map.put(key, "Room Common: " + roomHashMap.get(tmp.getRoom().getName()) + "-" + a);
+						else
+							map.put(key, map.get(key) + ", Room Common: " + roomHashMap.get(tmp.getRoom().getName()) + "-" + a);
+					} else {
+						roomHashMap.put(tmp.getRoom().getName(), a);
+					}
+
+					if (profHashMap.containsKey(tmp.getTeacher())) {
+						if (!map.containsKey(key))
+							map.put(key, "Prof Common: " + profHashMap.get(tmp.getTeacher()) + "-" + a);
+						else
+							map.put(key, map.get(key) + ", Prof Common: " + profHashMap.get(tmp.getTeacher()) + "-" + a);
+					} else {
+						profHashMap.put(tmp.getTeacher(), a);
+					}
+
+				}
+			}
+
+			// System.out.println(mpp.values());
+		}
+		for (String objectName : map.keySet()) {
+			System.out.println(objectName + "-> " + map.get(objectName));
+		}
+		System.out.println("saaaaaaaaaaaaaaaaaaaaaaaaa");
+		return ResponseEntity.ok()
+				.body(map);
 	}
 
 }
