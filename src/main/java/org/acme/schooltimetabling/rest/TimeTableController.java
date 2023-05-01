@@ -240,100 +240,100 @@ public class TimeTableController {
             
         }
     }
-    @GetMapping()
-    public TimeTable getTimeTable() {
-        // Get the solver status before loading the solution
-        // to avoid the race condition that the solver terminates between them
-        SolverStatus solverStatus = getSolverStatus();
-        TimeTable solution = timeTableRepository.findById(TimeTableRepository.SINGLETON_TIME_TABLE_ID);
-        scoreManager.updateScore(solution); // Sets the score
-        ScoreExplanation<TimeTable, HardSoftScore> scoreExplanation = scoreManager.explainScore(solution);
+    // @GetMapping()
+    // public TimeTable getTimeTable() {
+    //     // Get the solver status before loading the solution
+    //     // to avoid the race condition that the solver terminates between them
+    //     SolverStatus solverStatus = getSolverStatus();
+    //     TimeTable solution = timeTableRepository.findById(TimeTableRepository.SINGLETON_TIME_TABLE_ID);
+    //     scoreManager.updateScore(solution); // Sets the score
+    //     ScoreExplanation<TimeTable, HardSoftScore> scoreExplanation = scoreManager.explainScore(solution);
         
-        Map<String,ConstraintMatchTotal<HardSoftScore>> constraintMatchTotals = scoreExplanation.getConstraintMatchTotalMap();
-        for (String constraintMatchTotal : constraintMatchTotals.keySet()) {
-            System.out.println("ConstraintMatchTotal: " + constraintMatchTotal);
-            System.out.println("Score: " + constraintMatchTotals.get(constraintMatchTotal).getScore());
-        }
-        Map<Object,Indictment<HardSoftScore>> constraintIndicTotals=scoreExplanation.getIndictmentMap();
-        for (Object ind : constraintIndicTotals.keySet()) {
-            System.out.println("Constraint break " + ind);
-            System.out.println("Score: " + constraintIndicTotals.get(ind));
-        }
-        Lesson[][][] lessons=new Lesson[5][12][9];
-        // JsonArray jsonArray=new JsonArray();
-        // for(int i=0;i<5;i++){
-        //     for(int j=0;j<12;j++){
-        //         JsonArray jsonArray2=new JsonArray();
-        //         jsonArray.add(jsonArray2);
-        //     }
-        // }
+    //     Map<String,ConstraintMatchTotal<HardSoftScore>> constraintMatchTotals = scoreExplanation.getConstraintMatchTotalMap();
+    //     for (String constraintMatchTotal : constraintMatchTotals.keySet()) {
+    //         System.out.println("ConstraintMatchTotal: " + constraintMatchTotal);
+    //         System.out.println("Score: " + constraintMatchTotals.get(constraintMatchTotal).getScore());
+    //     }
+    //     Map<Object,Indictment<HardSoftScore>> constraintIndicTotals=scoreExplanation.getIndictmentMap();
+    //     for (Object ind : constraintIndicTotals.keySet()) {
+    //         System.out.println("Constraint break " + ind);
+    //         System.out.println("Score: " + constraintIndicTotals.get(ind));
+    //     }
+    //     Lesson[][][] lessons=new Lesson[5][12][9];
+    //     // JsonArray jsonArray=new JsonArray();
+    //     // for(int i=0;i<5;i++){
+    //     //     for(int j=0;j<12;j++){
+    //     //         JsonArray jsonArray2=new JsonArray();
+    //     //         jsonArray.add(jsonArray2);
+    //     //     }
+    //     // }
     
-        // Map<String,Object> responseMap=new HashMap<>();
-        // responseMap.put("tt obj", solution);
-        // responseMap.put("score", scoreExplanation.getScore());
-        // // lessons[0][0][0]=solution.getLessonList().get(0);
-        try {
-            for(Lesson l:solution.getLessonList()){
-                if(l.getTimeslot()==null)
-                    continue;
-                long slotId=l.getTimeslot().getId()-1;
-                // System.out.println(slotId);
-                int day=(int)(slotId/4) ;
-                int slot=(int)(slotId)%4;
-                slot=slot*3;
-                int index=0;
-                // jsonArray.get(day).get(slot).add(l);
-                for(;index<9&&lessons[day][slot][index]!=null;index++);
-                // System.out.println("day: "+day+" slot: "+slot+" index: "+index);
-                lessons[day][slot][index]=l;
-                lessons[day][slot+1][index]=l;
-                lessons[day][slot+2][index]=l;
+    //     // Map<String,Object> responseMap=new HashMap<>();
+    //     // responseMap.put("tt obj", solution);
+    //     // responseMap.put("score", scoreExplanation.getScore());
+    //     // // lessons[0][0][0]=solution.getLessonList().get(0);
+    //     try {
+    //         for(Lesson l:solution.getLessonList()){
+    //             if(l.getTimeslot()==null)
+    //                 continue;
+    //             long slotId=l.getTimeslot().getId()-1;
+    //             // System.out.println(slotId);
+    //             int day=(int)(slotId/4) ;
+    //             int slot=(int)(slotId)%4;
+    //             slot=slot*3;
+    //             int index=0;
+    //             // jsonArray.get(day).get(slot).add(l);
+    //             for(;index<9&&lessons[day][slot][index]!=null;index++);
+    //             // System.out.println("day: "+day+" slot: "+slot+" index: "+index);
+    //             lessons[day][slot][index]=l;
+    //             lessons[day][slot+1][index]=l;
+    //             lessons[day][slot+2][index]=l;
     
                 
-            }    
-        } catch (Exception e) {
-            System.out.println(e);
-            // TODO: handle exception
-        }
+    //         }    
+    //     } catch (Exception e) {
+    //         System.out.println(e);
+    //         // TODO: handle exception
+    //     }
         
-        try {
-            BufferedWriter bWriter = new BufferedWriter(new FileWriter("finalTT.csv"));
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < lessons.length; i++) {
-            for (int j = 0; j < lessons[0].length; j++) {
-                int l = lessons[i][j].length;
-                for (int p = 0; p < l; p++) {
-                    if (lessons[i][j][p] != null)
-                    if(lessons[i][j][p].getMultipleSection())
-                        sb.append(lessons[i][j][p].getSubject()+"("+lessons[i][j][p].getSection()+")" + ":" + lessons[i][j][p].getRoom());
-                    else
-                    sb.append(lessons[i][j][p].getSubject() + ":" + lessons[i][j][p].getRoom());
+    //     try {
+    //         BufferedWriter bWriter = new BufferedWriter(new FileWriter("finalTT.csv"));
+    //     StringBuilder sb = new StringBuilder();
+    //     for (int i = 0; i < lessons.length; i++) {
+    //         for (int j = 0; j < lessons[0].length; j++) {
+    //             int l = lessons[i][j].length;
+    //             for (int p = 0; p < l; p++) {
+    //                 if (lessons[i][j][p] != null)
+    //                 if(lessons[i][j][p].getMultipleSection())
+    //                     sb.append(lessons[i][j][p].getSubject()+"("+lessons[i][j][p].getSection()+")" + ":" + lessons[i][j][p].getRoom());
+    //                 else
+    //                 sb.append(lessons[i][j][p].getSubject() + ":" + lessons[i][j][p].getRoom());
 
-                    sb.append(",");
-                }
-                // if (j != lessons[0].length - 1)
-                    sb.append("|");
-            }
-            if (i != 4)
-                sb.append("\n");
-        }
-        bWriter.write(sb.toString());
-        bWriter.close();
+    //                 sb.append(",");
+    //             }
+    //             // if (j != lessons[0].length - 1)
+    //                 sb.append("|");
+    //         }
+    //         if (i != 4)
+    //             sb.append("\n");
+    //     }
+    //     bWriter.write(sb.toString());
+    //     bWriter.close();
             
-        } catch (Exception e) {
-            // TODO: handle exception
-            System.out.println(e);
-        }
-        // responseMap.put("tt matrix", lessons);
+    //     } catch (Exception e) {
+    //         // TODO: handle exception
+    //         System.out.println(e);
+    //     }
+    //     // responseMap.put("tt matrix", lessons);
         
 
 
 
 
-        solution.setSolverStatus(solverStatus);
-        // return responseMap;
-        return solution;
-    }
+    //     solution.setSolverStatus(solverStatus);
+    //     // return responseMap;
+    //     return solution;
+    // }
     
     @CrossOrigin(maxAge = 3600)
     @PostMapping("/createTimeTable")
@@ -359,7 +359,7 @@ public class TimeTableController {
     public void stopSolving() {
         solverManager.terminateEarly(TimeTableRepository.SINGLETON_TIME_TABLE_ID);
     }
-    public static String getTimeTable(String path) throws IOException {
+    public static String getFile(String path) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(new File(path)));
         return reader.lines().collect(Collectors.joining("\n"));
     }
@@ -409,7 +409,8 @@ public class TimeTableController {
 				String reportName = "finalTT.csv";
 				// File file = new File(reportName);
 				// System.out.println(file.exists());
-				map.put("timetable", getTimeTable(reportName));
+				map.put("timetable", getFile(reportName));
+                map.put("free Rooms", getFile("FreeRoom.csv"));
 				return ResponseEntity.ok()
 						.body(map);
 
