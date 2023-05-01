@@ -169,6 +169,64 @@ public class TimeTableController {
             lessonRepository.save(lesson);
     }
     // To try, GET http://localhost:8080/timeTable
+
+    void WriteTT(TimeTable solution)
+    {
+        Lesson[][][] lessons=new Lesson[5][12][9];
+        try {
+            for(Lesson l:solution.getLessonList()){
+                if(l.getTimeslot()==null)
+                    continue;
+                long slotId=l.getTimeslot().getId()-1;
+                // System.out.println(slotId);
+                int day=(int)(slotId/4) ;
+                int slot=(int)(slotId)%4;
+                slot=slot*3;
+                int index=0;
+                // jsonArray.get(day).get(slot).add(l);
+                for(;index<9&&lessons[day][slot][index]!=null;index++);
+                // System.out.println("day: "+day+" slot: "+slot+" index: "+index);
+                lessons[day][slot][index]=l;
+                lessons[day][slot+1][index]=l;
+                lessons[day][slot+2][index]=l;
+    
+                
+            }    
+        } catch (Exception e) {
+            System.out.println(e);
+            // TODO: handle exception
+        }
+        
+        try {
+            BufferedWriter bWriter = new BufferedWriter(new FileWriter("test.csv"));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < lessons.length; i++) {
+            for (int j = 0; j < lessons[0].length; j++) {
+                int l = lessons[i][j].length;
+                for (int p = 0; p < l; p++) {
+                    if (lessons[i][j][p] != null)
+                    if(lessons[i][j][p].getMultipleSection())
+                        sb.append(lessons[i][j][p].getSubject()+"("+lessons[i][j][p].getSection()+")" + ":" + lessons[i][j][p].getRoom());
+                    else
+                    sb.append(lessons[i][j][p].getSubject() + ":" + lessons[i][j][p].getRoom());
+
+                    sb.append(",");
+                }
+                // if (j != lessons[0].length - 1)
+                    sb.append("|");
+            }
+            if (i != 4)
+                sb.append("\n");
+        }
+        bWriter.write(sb.toString());
+        bWriter.close();
+            
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.out.println(e);
+        }
+
+    }
     @GetMapping()
     public TimeTable getTimeTable() {
         // Get the solver status before loading the solution
@@ -271,7 +329,12 @@ public class TimeTableController {
         createLessons((ArrayList<HashMap<String,Object>>)body.get("tt"));
         solverManager.solveAndListen(TimeTableRepository.SINGLETON_TIME_TABLE_ID,
                 timeTableRepository::findById,
-                timeTableRepository::save);
+                (TimeTable t)->{ 
+
+                    timeTableRepository.save(t);
+                    WriteTT(t);
+                    
+                });
         return Map.of("status","started");
     }
 
@@ -285,7 +348,7 @@ public class TimeTableController {
     }
     public static String getTimeTable(String path) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(new File(path)));
-        return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        return reader.lines().collect(Collectors.joining("\n"));
     }
     @CrossOrigin(maxAge = 3600)
 	@GetMapping(value = "/getTimeTable")
@@ -305,7 +368,7 @@ public class TimeTableController {
             System.out.println("Constraint break " + ind);
             System.out.println("Score: " + constraintIndicTotals.get(ind));
         }
-        Lesson[][][] lessons=new Lesson[5][12][9];
+        
         // JsonArray jsonArray=new JsonArray();
         // for(int i=0;i<5;i++){
         //     for(int j=0;j<12;j++){
@@ -318,58 +381,7 @@ public class TimeTableController {
         // responseMap.put("tt obj", solution);
         // responseMap.put("score", scoreExplanation.getScore());
         // // lessons[0][0][0]=solution.getLessonList().get(0);
-        try {
-            for(Lesson l:solution.getLessonList()){
-                if(l.getTimeslot()==null)
-                    continue;
-                long slotId=l.getTimeslot().getId()-1;
-                // System.out.println(slotId);
-                int day=(int)(slotId/4) ;
-                int slot=(int)(slotId)%4;
-                slot=slot*3;
-                int index=0;
-                // jsonArray.get(day).get(slot).add(l);
-                for(;index<9&&lessons[day][slot][index]!=null;index++);
-                // System.out.println("day: "+day+" slot: "+slot+" index: "+index);
-                lessons[day][slot][index]=l;
-                lessons[day][slot+1][index]=l;
-                lessons[day][slot+2][index]=l;
-    
-                
-            }    
-        } catch (Exception e) {
-            System.out.println(e);
-            // TODO: handle exception
-        }
         
-        try {
-            BufferedWriter bWriter = new BufferedWriter(new FileWriter("test.csv"));
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < lessons.length; i++) {
-            for (int j = 0; j < lessons[0].length; j++) {
-                int l = lessons[i][j].length;
-                for (int p = 0; p < l; p++) {
-                    if (lessons[i][j][p] != null)
-                    if(lessons[i][j][p].getMultipleSection())
-                        sb.append(lessons[i][j][p].getSubject()+"("+lessons[i][j][p].getSection()+")" + ":" + lessons[i][j][p].getRoom());
-                    else
-                    sb.append(lessons[i][j][p].getSubject() + ":" + lessons[i][j][p].getRoom());
-
-                    sb.append(",");
-                }
-                // if (j != lessons[0].length - 1)
-                    sb.append("|");
-            }
-            if (i != 4)
-                sb.append("\n");
-        }
-        bWriter.write(sb.toString());
-        bWriter.close();
-            
-        } catch (Exception e) {
-            // TODO: handle exception
-            System.out.println(e);
-        }
         // responseMap.put("tt matrix", lessons);
         
 
@@ -474,7 +486,7 @@ public class TimeTableController {
 		for (String objectName : map.keySet()) {
 			System.out.println(objectName + "-> " + map.get(objectName));
 		}
-		System.out.println("saaaaaaaaaaaaaaaaaaaaaaaaa");
+		// System.out.println("saaaaaaaaaaaaaaaaaaaaaaaaa");
 		return ResponseEntity.ok()
 				.body(map);
 	}
