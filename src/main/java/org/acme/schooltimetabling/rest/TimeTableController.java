@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,28 +78,7 @@ public class TimeTableController {
                 subjectDataList.add(subjectDetails);
                 subjectData.put(subjectDetails[0], subjectDataList);
             }
-            // parsing a CSV file into BufferedReader class constructor
-            // BufferedReader br = new BufferedReader(new FileReader("coursecodes.csv"));
-            // br.readLine();
-            // while ((line = br.readLine()) != null) // returns a Boolean value
-            // {
-            //     String[] subjectDetails = line.split(splitBy);
-
-            //     ArrayList<String[]> subjectDataList = new ArrayList<>();
-            //     // subjectData.add(subjectDetails);
-            //     if (subjectData.containsKey(subjectDetails[0])) {
-            //         subjectDataList = subjectData.get(subjectDetails[0]);
-            //     }
-            //     subjectDataList.add(subjectDetails);
-            //     subjectData.put(subjectDetails[0], subjectDataList);
-            //     // Lesson subject = new
-            //     // Lesson(subjectDetails[0],subjectDetails[2],"",Integer.valueOf(subjectDetails[1]),dept);
-            //     // Lesson subjectDup=new
-            //     // Lesson(subjectDetails[0],subjectDetails[2],"",Integer.valueOf(subjectDetails[1]),dept);
-            //     // subjectList.add(subject);
-            //     // subjectList.add(subjectDup);
-            // }
-            // br.close();
+            
             for (String subjectCode : subjectData.keySet()) {
                 if (subjectData.get(subjectCode).size() == 1) {
                     String[] subjectDetails = subjectData.get(subjectCode).get(0);
@@ -173,6 +153,8 @@ public class TimeTableController {
     void WriteTT(TimeTable solution)
     {
         Lesson[][][] lessons=new Lesson[5][12][9];
+        HashSet<String>[][] occupiedRoomSet=new HashSet[5][12];
+        HashSet<String> allRoomSet=new HashSet<>(roomRepository.findAll().stream().map(r->r.getName()).collect(Collectors.toList()));
         try {
             for(Lesson l:solution.getLessonList()){
                 if(l.getTimeslot()==null)
@@ -186,6 +168,10 @@ public class TimeTableController {
                 // jsonArray.get(day).get(slot).add(l);
                 for(;index<9&&lessons[day][slot][index]!=null;index++);
                 // System.out.println("day: "+day+" slot: "+slot+" index: "+index);
+                HashSet<String> occupiedRooms=new HashSet<>();
+                if(occupiedRoomSet[day][slot]!=null)
+                    occupiedRooms=occupiedRoomSet[day][slot];
+                occupiedRooms.add(l.getRoom().getName());
                 lessons[day][slot][index]=l;
                 lessons[day][slot+1][index]=l;
                 lessons[day][slot+2][index]=l;
@@ -198,11 +184,14 @@ public class TimeTableController {
         }
         
         try {
-            BufferedWriter bWriter = new BufferedWriter(new FileWriter("test.csv"));
+            BufferedWriter bWriter = new BufferedWriter(new FileWriter("finalTT.csv"));
+            
         StringBuilder sb = new StringBuilder();
+        
         for (int i = 0; i < lessons.length; i++) {
             for (int j = 0; j < lessons[0].length; j++) {
                 int l = lessons[i][j].length;
+
                 for (int p = 0; p < l; p++) {
                     if (lessons[i][j][p] != null)
                     if(lessons[i][j][p].getMultipleSection())
@@ -226,6 +215,30 @@ public class TimeTableController {
             System.out.println(e);
         }
 
+        try {
+            BufferedWriter freeRoomWriter= new BufferedWriter(new FileWriter("FreeRoom.csv"));
+            StringBuilder freeRoomSb=new StringBuilder();
+            for(int i=0;i<occupiedRoomSet.length;i++){
+                for(int j=0;j<occupiedRoomSet[0].length;j++){
+                    HashSet<String> occupiedRooms=occupiedRoomSet[i][j];
+                    if(occupiedRooms==null)
+                        occupiedRooms=new HashSet<>();
+                    HashSet<String> freeRooms=new HashSet<>(allRoomSet);
+                    freeRooms.removeAll(occupiedRooms);
+                    for(String room:freeRooms){
+                        freeRoomSb.append(room+",");
+                    }
+                    freeRoomSb.append("|");
+                }
+                if(i!=4)
+                    freeRoomSb.append("\n");
+            }    
+            freeRoomWriter.write(freeRoomSb.toString());
+            freeRoomWriter.close();
+        } catch (Exception e) {
+            System.out.println(e);
+            
+        }
     }
     @GetMapping()
     public TimeTable getTimeTable() {
@@ -284,7 +297,7 @@ public class TimeTableController {
         }
         
         try {
-            BufferedWriter bWriter = new BufferedWriter(new FileWriter("test.csv"));
+            BufferedWriter bWriter = new BufferedWriter(new FileWriter("finalTT.csv"));
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < lessons.length; i++) {
             for (int j = 0; j < lessons[0].length; j++) {
@@ -393,7 +406,7 @@ public class TimeTableController {
 		HashMap<String, String> map = new HashMap<>();
 		try {
 			// if (isCreating.get() == false) {
-				String reportName = "test.csv";
+				String reportName = "finalTT.csv";
 				// File file = new File(reportName);
 				// System.out.println(file.exists());
 				map.put("timetable", getTimeTable(reportName));
