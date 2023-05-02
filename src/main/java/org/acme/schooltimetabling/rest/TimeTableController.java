@@ -65,12 +65,16 @@ public class TimeTableController {
         HashMap<String, ArrayList<String[]>> subjectData = new HashMap<>();
         ArrayList<Lesson> subjectList = new ArrayList<>();
         try {
+            BufferedWriter courseListWriter=new BufferedWriter(new FileWriter("courseList.csv"));
+            StringBuilder courseListSb=new StringBuilder();
+            courseListSb.append("CourseCode,registration,Professor\n"); 
             for(HashMap<String,Object> subject:inputSubjectList){
                 String[] subjectDetails = new String[3];
                 subjectDetails[0]=subject.get("CourseCode").toString();
                 subjectDetails[1]=subject.get("registration").toString();
                 subjectDetails[2]=subject.get("Professor").toString();
                 ArrayList<String[]> subjectDataList = new ArrayList<>();
+                courseListSb.append(subjectDetails[0]+","+subjectDetails[1]+","+subjectDetails[2]+"\n");
                 // subjectData.add(subjectDetails);
                 if (subjectData.containsKey(subjectDetails[0])) {
                     subjectDataList = subjectData.get(subjectDetails[0]);
@@ -129,6 +133,8 @@ public class TimeTableController {
 
                 }
             }
+            courseListWriter.write(courseListSb.toString());
+            courseListWriter.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -149,6 +155,27 @@ public class TimeTableController {
             lessonRepository.save(lesson);
     }
     // To try, GET http://localhost:8080/timeTable
+    void readCourseList()
+    {
+        try {
+            BufferedReader courseListReader=new BufferedReader(new FileReader("courseList.csv"));
+            String line=courseListReader.readLine();
+            line=courseListReader.readLine();
+            while((line=courseListReader.readLine())!=null){
+                String[] subjectDetails=line.split(",");
+                Lesson subject = new Lesson(subjectDetails[0], subjectDetails[2], "",
+                            Integer.valueOf(subjectDetails[1]), "");
+                    Lesson subjectDup = new Lesson(subjectDetails[0], subjectDetails[2], "",
+                            Integer.valueOf(subjectDetails[1]), "");
+                    subjectList.add(subject);
+                    subjectList.add(subjectDup);
+            }
+            courseListReader.close();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        
+    }
 
     void WriteTT(TimeTable solution)
     {
@@ -339,6 +366,10 @@ public class TimeTableController {
     @PostMapping("/createTimeTable")
     public Map<String,String> solve(@RequestBody Map<String,Object> body)  {
         // System.out.println(body);
+        if(getSolverStatus()==SolverStatus.NOT_SOLVING)
+        {
+
+        
         createLessons((ArrayList<HashMap<String,Object>>)body.get("tt"));
         solverManager.solveAndListen(TimeTableRepository.SINGLETON_TIME_TABLE_ID,
                 timeTableRepository::findById,
@@ -349,6 +380,9 @@ public class TimeTableController {
                     
                 });
         return Map.of("status","started");
+            }
+        else
+            return Map.of("status","already started");
     }
 
     public SolverStatus getSolverStatus() {
@@ -367,6 +401,8 @@ public class TimeTableController {
 	@GetMapping(value = "/getTimeTable")
 	public ResponseEntity exportCSV() {
         SolverStatus solverStatus = getSolverStatus();
+        if(solverStatus==SolverStatus.NOT_SOLVING)
+        {
         TimeTable solution = timeTableRepository.findById(TimeTableRepository.SINGLETON_TIME_TABLE_ID);
         scoreManager.updateScore(solution); // Sets the score
         ScoreExplanation<TimeTable, HardSoftScore> scoreExplanation = scoreManager.explainScore(solution);
@@ -409,6 +445,7 @@ public class TimeTableController {
 				String reportName = "finalTT.csv";
 				// File file = new File(reportName);
 				// System.out.println(file.exists());
+                map.put("status", "done");
 				map.put("timetable", getFile(reportName));
                 map.put("free Rooms", getFile("FreeRoom.csv"));
 				return ResponseEntity.ok()
@@ -422,6 +459,14 @@ public class TimeTableController {
 		} catch (Exception ex) {
 			System.out.println(ex);
 		}
+    }
+    else
+    {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("status", "creating timetable");
+        return ResponseEntity.ok()
+                .body(map);
+    }
 		return null;
 	}
 
@@ -436,6 +481,10 @@ public class TimeTableController {
 		// System.out.println(timetable);
 		// JSONArray t = new JSONArray(timetable.get("timetable"));
 		ArrayList<ArrayList<String>> tempt = temp2.get("timetable");
+        if(subjectList==null||subjectList.size()==0)
+        {
+            readCourseList();
+        }
 		// String[][].class);
 		// System.out.println(jsono.get("tiemtable"));
 		// JSONArray json = new JSONArray(timetable.get("timetable"));

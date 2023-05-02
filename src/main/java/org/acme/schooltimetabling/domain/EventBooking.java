@@ -11,7 +11,7 @@ import javax.persistence.GeneratedValue;
 @Document(collection = "eventBooking")
 public class EventBooking {
     
-
+    
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
