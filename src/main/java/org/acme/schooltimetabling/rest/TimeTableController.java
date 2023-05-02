@@ -160,7 +160,6 @@ public class TimeTableController {
         try {
             BufferedReader courseListReader=new BufferedReader(new FileReader("courseList.csv"));
             String line=courseListReader.readLine();
-            line=courseListReader.readLine();
             while((line=courseListReader.readLine())!=null){
                 String[] subjectDetails=line.split(",");
                 Lesson subject = new Lesson(subjectDetails[0], subjectDetails[2], "",
@@ -493,7 +492,7 @@ public class TimeTableController {
 
 		// map.put("status", "");
 		String[][] ttvalues = tempt.stream().map(u -> u.toArray(new String[0])).toArray(String[][]::new);
-		System.out.println(ttvalues[0][0]);
+		// System.out.println(ttvalues[0][0]);
 		// ttvalues = temp;
         HashMap<String, Lesson> subMap = new HashMap<>();
 		HashMap<String, String> map = new HashMap<>();
@@ -504,15 +503,23 @@ public class TimeTableController {
 
 		for (int i = 0; i < ttvalues.length; i++) {
 			for (int j = 0; j < ttvalues[0].length; j++) {
-				String[] arrOfStr = ttvalues[i][j].split("\n");
+				String[] arrOfStr = ttvalues[i][j].split(",");
 				String key = Integer.toString(i) + "," + Integer.toString(j);
 				HashMap<String, String> codeHashMap = new HashMap<>();
 				HashMap<String, String> roomHashMap = new HashMap<>();
 				HashMap<String, String> profHashMap = new HashMap<>();
 				for (String a : arrOfStr) {
 					String[] courseCode = a.split(":");
-					System.out.println(courseCode[0]);
-					Lesson tmp = subMap.get(courseCode[0]);
+					// System.out.println(courseCode[0]);
+                    if(courseCode[0].strip().length()==0)
+                    {
+                        continue;
+                    }
+					Lesson tmp = subMap.get(courseCode[0].strip());
+                    if(tmp==null)
+                    {
+                        System.out.println(courseCode[0]);
+                    }
 					if (codeHashMap.containsKey(tmp.getSubject())) {
 						if (!map.containsKey(key))
 							map.put(key, "Course Common: " + codeHashMap.get(tmp.getSubject()) + "-" + a);
@@ -523,13 +530,13 @@ public class TimeTableController {
 						codeHashMap.put(tmp.getSubject(), a);
 					}
 
-					if (roomHashMap.containsKey(tmp.getRoom().getName())) {
+					if (roomHashMap.containsKey(courseCode[1].strip())) {
 						if (!map.containsKey(key))
-							map.put(key, "Room Common: " + roomHashMap.get(tmp.getRoom().getName()) + "-" + a);
+							map.put(key, "Room Common: " + roomHashMap.get(courseCode[1].strip()) + "-" + a);
 						else
-							map.put(key, map.get(key) + ", Room Common: " + roomHashMap.get(tmp.getRoom().getName()) + "-" + a);
+							map.put(key, map.get(key) + ", Room Common: " + roomHashMap.get(courseCode[1].strip()) + "-" + a);
 					} else {
-						roomHashMap.put(tmp.getRoom().getName(), a);
+						roomHashMap.put(courseCode[1].strip(), a);
 					}
 
 					if (profHashMap.containsKey(tmp.getTeacher())) {
