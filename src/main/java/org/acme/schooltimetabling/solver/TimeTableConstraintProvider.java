@@ -29,95 +29,10 @@ import java.time.DayOfWeek;
 
 import org.acme.schooltimetabling.domain.Lesson;
 import org.acme.schooltimetabling.domain.Timeslot;
+import org.acme.schooltimetabling.utils.ReadWrite;
 
 public class TimeTableConstraintProvider implements ConstraintProvider {
-    private List<Set<String>> subjectSets;
-    List<HashSet<String>> setBucketList()
-    {
-        String line = "";
-        String splitBy = ",";
-        BufferedReader br;
-        try {
-             br = new BufferedReader(new FileReader("subject_bucket_list.csv"));
-            br.readLine();
-            List<Set<String>> bucketList = new ArrayList<>();
-            HashSet<String> bucket = new HashSet<>();
-            List<HashSet<String>> seriesBuckets = new ArrayList<>();
-            seriesBuckets.add(bucket);
-            while ((line = br.readLine()) != null) // returns a Boolean value
-            {
-                String[] subjectDetails = line.split(splitBy);
-                if(subjectDetails.length==1)
-                {
-                    // bucketList.add(bucket);
-                    for(HashSet<String> set: seriesBuckets)
-                    {
-                        if(set.size()>0)
-                        {
-
-                            bucketList.add(set);
-                        }
-                    }
-                    bucket = new HashSet<>();
-                    seriesBuckets= new ArrayList<>();
-                    seriesBuckets.add(bucket);
-                    continue;
-                }
-                else if(subjectDetails.length>=2)
-                {
-                    if(subjectDetails.length==2)
-                    {
-                        for(HashSet<String> set: seriesBuckets)
-                        {
-                            set.add(subjectDetails[1]);
-                        }
-                    }
-                    else
-                    {
-                        int multiplier=subjectDetails.length-1;
-                        List<HashSet<String>> newSeriesBuckets = new ArrayList<>();
-                        for(int i=0;i<multiplier;i++)
-                        {
-                            
-                            for(HashSet<String> set: seriesBuckets)
-                            {
-                                newSeriesBuckets.add((HashSet<String>) set.clone());
-                            }
-                        }
-                        // for(int i=0;i<multiplier;i++)
-                        // {
-                        //     for(int j=1;j<subjectDetails.length;j++)
-                        //     {
-                        //         newSeriesBuckets.get(i*multiplier+j-1 ).add(subjectDetails[j]);
-                        //     }
-                        // }
-                        int sub=0;
-                        for(int i=0;i<newSeriesBuckets.size();i++,sub++)
-                        {
-                            sub=sub%multiplier;
-                            newSeriesBuckets.get(i).add(subjectDetails[sub+1]);
-                        }
-                        seriesBuckets=newSeriesBuckets;
-
-                    }
-                
-            }
-        }
-
-            br.close();
-            // return bucketList;
-            this.subjectSets=bucketList;
-            
-        } catch (Exception e) {
-            
-            System.out.println(e.getMessage());
-            // TODO: handle exception
-        }
-        return null; 
-        
-
-
-    }
+    private List<Set<String>> subjectSets=ReadWrite.getBucketList();
 
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
@@ -125,7 +40,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         // subjectSets =  TimeTableSpringBootApp.getbucketList();
         // subjectSets.add(Set.of("Math","Chemistry","Biology"));
         // Map<String, Integer> minLessonCount = Map.of("cse",2,"ece",1);
-        setBucketList();
+        
         List<LocalTime> startTimeList =List.of(LocalTime.of(9, 30),LocalTime.of(11,0),LocalTime.of(15,0),LocalTime.of(16,30));
         List<LocalTime> endTimeList =List.of(LocalTime.of(11, 0),LocalTime.of(12,30),LocalTime.of(16,30),LocalTime.of(18,0));
         Constraint[] slotConstraints = new Constraint[18];
