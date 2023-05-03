@@ -653,10 +653,15 @@ public class TimeTableController {
         String[][][] roomCodes=new String[5][12][];
         for(int i=0;i<5;i++){
             for(int j=0;j<12;j++){
-                String[] arrOfStr = ttvalues[i][j].split(",");
+
+                String[] arrOfStr = ttvalues[i][j].split("\n");
                 courseCodes[i][j]=new String[arrOfStr.length];
                 roomCodes[i][j]=new String[arrOfStr.length];
                 for(int k=0;k<arrOfStr.length;k++){
+                    if(arrOfStr[k].strip().length()<3)
+                    {
+                        continue;
+                    }
                     String[] courseCode = arrOfStr[k].split(":");
                     courseCodes[i][j][k]=courseCode[0].strip();
                     roomCodes[i][j][k]=courseCode[1].strip();
