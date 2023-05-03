@@ -54,21 +54,21 @@ public class EventBookingService {
         }
         return freeRooms;
     }
-    public List<EventBooking> getBookings(String roomNo,LocalDateTime startTime,LocalDateTime endTime)
+    public List<EventBooking> getBookings(String roomNo,LocalDateTime startTime2,LocalDateTime endTime2)
     {
-        System.out.println(startTime);
-        System.out.println(endTime);
-        Criteria criteria1 = Criteria.where("startTime").gte(startTime);
-        Criteria criteria2 = Criteria.where("startTime").lte(endTime);
+        System.out.println(startTime2);
+        System.out.println(endTime2);
+        Criteria criteria1 = Criteria.where("startTime").gte(startTime2);
+        Criteria criteria2 = Criteria.where("startTime").lt(endTime2);
         criteria2.andOperator(criteria1);
-        Criteria criteria3 = Criteria.where("endTime").gte(startTime);
-        Criteria criteria4= Criteria.where("endTime").lte(endTime);
+        Criteria criteria3 = Criteria.where("endTime").gt(startTime2);
+        Criteria criteria4= Criteria.where("endTime").lte(endTime2);
         criteria4.andOperator(criteria3);
-        Criteria criteria5= Criteria.where("startTime").lte(startTime);
-        Criteria criteria6= Criteria.where("endTime").gte(startTime);
+        Criteria criteria5= Criteria.where("startTime").lte(startTime2);
+        Criteria criteria6= Criteria.where("endTime").gt(startTime2);
         criteria6.andOperator(criteria5);
-        Criteria criteria8= Criteria.where("startTime").lte(endTime);
-        Criteria criteria9= Criteria.where("endTime").gte(endTime);
+        Criteria criteria8= Criteria.where("startTime").lt(endTime2);
+        Criteria criteria9= Criteria.where("endTime").gte(endTime2);
         criteria9.andOperator(criteria8);
         Criteria criteria7=new Criteria();
         criteria7.orOperator(criteria6,criteria2,criteria9);
