@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -113,6 +115,27 @@ public class EventBookingController {
         eventBookingService.deleteBooking(id);
         return ResponseEntity.ok().body("Booking deleted");
     }
+    
+    String[] getRooms()
+    {
+        ArrayList<String> rooms=new ArrayList<String>();
+        try {
+            BufferedReader roomReader = new BufferedReader(new FileReader("rooms.csv"));
+            String line = roomReader.readLine();
+            while ((line = roomReader.readLine()) != null) {
+                String[] roomDetails = line.split(",");
+                rooms.add(roomDetails[0]);
+
+            }
+            roomReader.close();
+            return rooms.toArray(new String[0]);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        return null;
+
+
+    }
 
     @GetMapping("/getFreeRooms")
     @CrossOrigin(maxAge = 3600)
@@ -121,8 +144,9 @@ public class EventBookingController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"); // The format of the string
         LocalDateTime startTime = null;
         LocalDateTime endTime = null;
-        String[] temp={"a101","a102","a103"};
-        List<String> rooms= Arrays.asList(temp);
+        // String[] temp={"a101","a102","a103"};
+
+        List<String> rooms= Arrays.asList(getRooms());
 
         try {
         startTime = LocalDateTime.parse(startTimeString, formatter); // Parse the string and convert it to a DateTime object
