@@ -113,11 +113,9 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         // Map<String, Integer> minLessonCount = Map.of("cse",2,"ece",1);
         setBucketList();
         List<LocalTime> startTimeList = List.of(LocalTime.of(9, 00), LocalTime.of(10, 30), LocalTime.of(12, 00),
-                LocalTime.of(14, 30),
-                LocalTime.of(16, 00));
+                LocalTime.of(14, 30), LocalTime.of(16, 00));
         List<LocalTime> endTimeList = List.of(LocalTime.of(10, 30), LocalTime.of(12, 00), LocalTime.of(13, 30),
-                LocalTime.of(16, 00),
-                LocalTime.of(17, 30));
+                LocalTime.of(16, 00), LocalTime.of(17, 30));
         Constraint[] slotConstraints = new Constraint[22];
         for (int k = 0; k < 10; k++) {
             int i = k / 2;
@@ -158,6 +156,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 roomConflict(constraintFactory),
                 teacherConflict(constraintFactory),
                 noCourseRepeatOnSameDay(constraintFactory),
+                ensureSubjectRoomIsSamePenalty(constraintFactory),
                 // sameSubjectDifferentSectionConstraint(constraintFactory),
                 sameTimeslotSubjectSetConstraint(constraintFactory),
                 roomCapacityConstraint(constraintFactory),
@@ -190,6 +189,41 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                         + a.getDayOfWeek() + a.getStartTime() + a.getEndTime());
     }
 
+    private Constraint sameSubjectDifferentSectionConstraint(ConstraintFactory factory) {
+        return factory.forEachUniquePair(Lesson.class,
+                Joiners.equal(Lesson::getSubject),
+                Joiners.equal(Lesson::getSection)
+
+        )
+                .filter((lesson1, lesson2) -> lesson1.getMultipleSection() && lesson2.getMultipleSection())
+                .filter((lesson1, lesson2) -> !lesson1.getTimeslot().equals(lesson2.getTimeslot()))
+                .penalize(HardSoftScore.ofHard(2)).asConstraint("Same subject different section constraint");
+    }
+
+    private Constraint sameTimeslotSubjectSetConstraint(ConstraintFactory factory) {
+        return factory.forEach(Lesson.class)
+                .filter(lesson -> lesson.getTimeslot() != null && lesson.getSubject() != null)
+                .join(Lesson.class,
+                        Joiners.equal(Lesson::getTimeslot),
+                        Joiners.lessThan(Lesson::getId))
+                .filter((lesson1, lesson2) -> !lesson1.getSubject().equals(lesson2.getSubject()))
+                .filter((lesson1, lesson2) -> areSubjectsInSameSet(lesson1.getSubject(), lesson2.getSubject()))
+                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same timeslot subject set constraint");
+    }
+
+    private Constraint ensureSubjectRoomIsSamePenalty(ConstraintFactory constraintFactory) {
+        return constraintFactory.forEach(Lesson.class)
+                .filter(lesson -> lesson.getTimeslot() != null && lesson.getSubject() != null)
+                .ifNotExists(Lesson.class,
+                        Joiners.equal(Lesson::getSubject, Lesson::getSubject),
+                        Joiners.equal(Lesson::getTeacher, Lesson::getTeacher),
+                        Joiners.filtering((lessonA, lessonB) -> lessonA.getRoom().equals(lessonB.getRoom())),
+                        Joiners.filtering(
+                                (lesson1, lesson2) -> areSubjectsInSameSet(lesson1.getSubject(), lesson2.getSubject())))
+                .penalize(HardSoftScore.ONE_HARD)
+                .asConstraint("Ensure room-subject penalty");
+    }
+
     Constraint roomConflict(ConstraintFactory constraintFactory) {
         // A room can accommodate at most one lesson at the same time.
         return constraintFactory
@@ -215,17 +249,6 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .asConstraint("Teacher conflict");
     }
 
-    private Constraint sameSubjectDifferentSectionConstraint(ConstraintFactory factory) {
-        return factory.forEachUniquePair(Lesson.class,
-                Joiners.equal(Lesson::getSubject),
-                Joiners.equal(Lesson::getSection)
-
-        )
-                .filter((lesson1, lesson2) -> lesson1.getMultipleSection() && lesson2.getMultipleSection())
-                .filter((lesson1, lesson2) -> !lesson1.getTimeslot().equals(lesson2.getTimeslot()))
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same subject different teacher constraint");
-    }
-
     private Constraint roomCapacityConstraint(ConstraintFactory factory) {
         return factory.forEach(Lesson.class)
                 .filter(lesson -> lesson.getRoom() != null && lesson.getStrength() != null)
@@ -238,7 +261,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         return factory.forEach(Lesson.class)
                 .groupBy(Lesson::getTimeslot, slotCollector)
                 .filter((timeslot, count) -> count > max)
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Max lessons per timeslot");
+                .penalize(HardSoftScore.ONE_SOFT).asConstraint("Max lessons per timeslot");
     }
 
     public Constraint minLessonsPerTimeslot(ConstraintFactory factory, int min) {
@@ -246,7 +269,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         return factory.forEach(Lesson.class)
                 .groupBy(Lesson::getTimeslot, slotCollector)
                 .filter((timeslot, count) -> count < min)
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Min lessons per timeslot");
+                .penalize(HardSoftScore.ONE_SOFT).asConstraint("Min lessons per timeslot");
     }
 
     public Constraint maxLessonsPerDepartmentPerTimeslot(ConstraintFactory factory, String department, int max) {
@@ -267,17 +290,8 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 Joiners.equal(Lesson::getSubject),
                 Joiners.equal((L1) -> L1.getTimeslot().getDayOfWeek()),
                 Joiners.equal(Lesson::getTeacher))
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("No course repeat on same day");
-    }
-
-    private Constraint sameTimeslotSubjectSetConstraint(ConstraintFactory factory) {
-        return factory.forEach(Lesson.class)
-                .filter(lesson -> lesson.getTimeslot() != null && lesson.getSubject() != null)
-                .join(Lesson.class,
-                        Joiners.equal(Lesson::getTimeslot),
-                        Joiners.lessThan(Lesson::getId))
                 .filter((lesson1, lesson2) -> areSubjectsInSameSet(lesson1.getSubject(), lesson2.getSubject()))
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same timeslot subject set constraint1");
+                .penalize(HardSoftScore.ONE_HARD).asConstraint("No course repeat on same day");
     }
 
     private boolean areSubjectsInSameSet(String subject1, String subject2) {

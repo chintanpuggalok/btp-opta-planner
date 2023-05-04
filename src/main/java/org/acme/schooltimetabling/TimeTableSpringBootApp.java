@@ -27,6 +27,12 @@ import org.springframework.data.domain.Sort;
 @SpringBootApplication
 public class TimeTableSpringBootApp {
     static List<Set<String>> bucketListFinal = new ArrayList<>();
+    static List<String> courses1Y = new ArrayList<>(List.of("BIO101", "CSE102", "CSE112", "CSE140", "DES101", "DES202",
+            "ECE113", "MTH201", "SOC101", "ECO223", "SSH101"));
+    static List<String> courses2Y = new ArrayList<>(List.of("BIO213", "BIO221", "CSE202", "CSE222", "DES205", "DES206",
+            "ECE214", "ECE230", "ECE240", "MTH204", "MTH212", "ECO333", "ECO221", "SOC207", "SOC210", "SSH215"));
+
+    static List<String> weekfreq3 = new ArrayList<>(List.of("BIO101", "CSE140", "ECE113", "MTH201"));
 
     public static void main(String[] args) {
         SpringApplication.run(TimeTableSpringBootApp.class, args);
@@ -45,7 +51,7 @@ public class TimeTableSpringBootApp {
         ArrayList<Lesson> subjectList = new ArrayList<>();
         try {
             // parsing a CSV file into BufferedReader class constructor
-            BufferedReader br = new BufferedReader(new FileReader("coursecodes.csv"));
+            BufferedReader br = new BufferedReader(new FileReader("coursecodes_1Y.csv"));
             br.readLine();
             while ((line = br.readLine()) != null) // returns a Boolean value
             {
@@ -82,9 +88,22 @@ public class TimeTableSpringBootApp {
                         dept = "des";
                     else
                         dept = "other";
-                    Lesson subject = new Lesson(subjectDetails[0], subjectDetails[2], "",
+                    String tempGroup = "";
+                    if (courses1Y.contains(subjectCode)) {
+                        tempGroup = "Year 1";
+                    } else if (courses2Y.contains(subjectCode)) {
+                        tempGroup = "Year 2";
+                    } else {
+                        tempGroup = "UG/PG";
+                    }
+                    if (weekfreq3.contains(subjectCode)) {
+                        Lesson subject3 = new Lesson(subjectDetails[0], subjectDetails[2], tempGroup,
+                                Integer.valueOf(subjectDetails[1]), dept);
+                        subjectList.add(subject3);
+                    }
+                    Lesson subject = new Lesson(subjectDetails[0], subjectDetails[2], tempGroup,
                             Integer.valueOf(subjectDetails[1]), dept);
-                    Lesson subjectDup = new Lesson(subjectDetails[0], subjectDetails[2], "",
+                    Lesson subjectDup = new Lesson(subjectDetails[0], subjectDetails[2], tempGroup,
                             Integer.valueOf(subjectDetails[1]), dept);
                     subjectList.add(subject);
                     subjectList.add(subjectDup);
@@ -105,21 +124,31 @@ public class TimeTableSpringBootApp {
                     else
                         dept = "other";
                     char section = 'A';
-                    for (int i = 0; i < 2; i++) {
+                    int j = 2;
+                    String tempGroup = "";
+                    if (courses1Y.contains(subjectCode)) {
+                        tempGroup = "Year 1";
+                    } else if (courses2Y.contains(subjectCode)) {
+                        tempGroup = "Year 2";
+                    } else {
+                        tempGroup = "UG/PG";
+                    }
+                    if ((weekfreq3.contains(subjectCode))) {
+                        j = 3;
+                    }
+                    for (int i = 0; i < j; i++) {
                         String secString = String.valueOf(section + i);
                         for (String[] subjectDataArray : subjectDataList) {
-                            Lesson subject = new Lesson(subjectDataArray[0], subjectDataArray[2], "",
+                            Lesson subject = new Lesson(subjectDataArray[0], subjectDataArray[2], tempGroup,
                                     Integer.valueOf(subjectDataArray[1]), dept, secString);
                             subjectList.add(subject);
                         }
                     }
-
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return subjectList;
     }
 
