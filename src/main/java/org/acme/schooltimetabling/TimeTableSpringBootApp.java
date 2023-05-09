@@ -51,7 +51,7 @@ public class TimeTableSpringBootApp {
         ArrayList<Lesson> subjectList = new ArrayList<>();
         try {
             // parsing a CSV file into BufferedReader class constructor
-            BufferedReader br = new BufferedReader(new FileReader("coursecodes_1Y.csv"));
+            BufferedReader br = new BufferedReader(new FileReader("coursecodes_2Y.csv"));
             br.readLine();
             while ((line = br.readLine()) != null) // returns a Boolean value
             {
