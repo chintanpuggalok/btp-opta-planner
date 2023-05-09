@@ -17,7 +17,8 @@ import org.optaplanner.core.api.domain.variable.PlanningVariable;
 public class Lesson {
 
     @PlanningId
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
 
     private String subject;
@@ -27,6 +28,7 @@ public class Lesson {
     private Boolean multipleSection;
     private Integer strength;
     private String department;
+    private int WeeklyFrequency;
 
     @PlanningVariable
     @ManyToOne
@@ -40,38 +42,43 @@ public class Lesson {
     public Lesson() {
     }
 
+    public Lesson(String subject, String teacher, String studentGroup, int strength, String department) {
+        this.subject = subject;
+        this.teacher = teacher;
+        this.studentGroup = studentGroup;
+        this.section = "A";
+        this.multipleSection = false;
+        this.strength = strength;
+        this.department = department;
+        this.WeeklyFrequency = 2;
+    }
 
-    public Lesson(String subject, String teacher, String studentGroup,int strength,String department) {
+    public Lesson(String subject, String teacher, String studentGroup, int strength, String Department,
+            String section) {
         this.subject = subject;
         this.teacher = teacher;
         this.studentGroup = studentGroup;
-        this.section="A";
-        this.multipleSection=false;
-        this.strength=strength;
-        this.department=department;
+        this.section = section;
+        this.multipleSection = true;
+        this.strength = strength;
+        this.department = Department;
+        this.WeeklyFrequency = 2;
     }
-    public Lesson(String subject, String teacher, String studentGroup,int strength,String Department,String section) {
-        this.subject = subject;
-        this.teacher = teacher;
-        this.studentGroup = studentGroup;
-        this.section=section;
-        this.multipleSection=true;
-        this.strength=strength;
-        this.department=Department;
-    }
-    public Boolean getMultipleSection(){
+
+    public Boolean getMultipleSection() {
         return this.multipleSection;
     }
-    public Integer getStrength(){
+
+    public Integer getStrength() {
         return this.strength;
     }
 
-
-    // public Lesson(long id, String subject, String teacher, String studentGroup, Timeslot timeslot, Room room) {
-    //     this(subject, teacher, studentGroup);
-    //     this.id = id;
-    //     this.timeslot = timeslot;
-    //     this.room = room;
+    // public Lesson(long id, String subject, String teacher, String studentGroup,
+    // Timeslot timeslot, Room room) {
+    // this(subject, teacher, studentGroup);
+    // this.id = id;
+    // this.timeslot = timeslot;
+    // this.room = room;
     // }
 
     @Override
@@ -82,11 +89,11 @@ public class Lesson {
     // ************************************************************************
     // Getters and setters
     // ************************************************************************
-    public String getDepartment(){
-        
+    public String getDepartment() {
+
         return this.department;
     }
-    
+
     public String getSection() {
         return section;
     }
@@ -114,16 +121,24 @@ public class Lesson {
     public void setTimeslot(Timeslot timeslot) {
         this.timeslot = timeslot;
     }
+
+    public int getWeeklyFrequency() {
+        return WeeklyFrequency;
+    }
+
+    public void setWeeklyFrequency(int weeklyFrequency) {
+        this.WeeklyFrequency = weeklyFrequency;
+    }
     // public LocalTime getStartTime() {
-    //     return timeslot.getStartTime();
+    // return timeslot.getStartTime();
     // }
     // public DayOfWeek getDayOfWeek() {
-    //     // System.out.println("timeslot"+timeslot.toString());
-    //     if(timeslot == null)
-    //         return null;
-    //     else
-    //         return timeslot.getDayOfWeek();
-    //     // return timeslot.getDayOfWeek();
+    // // System.out.println("timeslot"+timeslot.toString());
+    // if(timeslot == null)
+    // return null;
+    // else
+    // return timeslot.getDayOfWeek();
+    // // return timeslot.getDayOfWeek();
     // }
 
     public Room getRoom() {
@@ -133,5 +148,4 @@ public class Lesson {
     public void setRoom(Room room) {
         this.room = room;
     }
-
 }

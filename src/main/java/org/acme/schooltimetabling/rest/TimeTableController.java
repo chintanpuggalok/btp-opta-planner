@@ -200,20 +200,20 @@ public class TimeTableController {
                 int index = 0;
                 // jsonArray.get(day).get(slot).add(l);
                 // for (; index < 10 && lessons[day][slot][index] != null; index++)
-                    ;
+                ;
                 // System.out.println("day: "+day+" slot: "+slot+" index: "+index);
                 HashSet<String> occupiedRooms = new HashSet<>();
-                HashSet<Lesson> lessonSlot1=new HashSet<>();
+                HashSet<Lesson> lessonSlot1 = new HashSet<>();
                 // HashSet<Lesson> lessonSlot2=new HashSet<>();
                 // HashSet<Lesson> lessonSlot3=new HashSet<>();
                 if (occupiedRoomSet[day][slot] != null)
                     occupiedRooms = occupiedRoomSet[day][slot];
-                if(lessons[day][slot]!=null)
-                    lessonSlot1=lessons[day][slot];
+                if (lessons[day][slot] != null)
+                    lessonSlot1 = lessons[day][slot];
                 // if(lessons[day][slot+1]!=null)
-                //     lessonSlot2=lessons[day][slot];
+                // lessonSlot2=lessons[day][slot];
                 // if(lessons[day][slot+2]!=null)
-                //     lessonSlot3=lessons[day][slot];
+                // lessonSlot3=lessons[day][slot];
 
                 occupiedRooms.add(l.getRoom().getName());
                 lessonSlot1.add(l);
@@ -237,9 +237,8 @@ public class TimeTableController {
             for (int i = 0; i < lessons.length; i++) {
                 for (int j = 0; j < lessons[0].length; j++) {
                     // int l = lessons[i][j].length;
-                    if(lessons[i][j]==null)
-                    {
-                        for(int k=0;k<10;k++)
+                    if (lessons[i][j] == null) {
+                        for (int k = 0; k < 10; k++)
                             sb.append(",");
                         sb.append("|");
 
@@ -403,6 +402,7 @@ public class TimeTableController {
         return "No clash";
 
     }
+
     @CrossOrigin(maxAge = 3600)
     @PostMapping("/createTimeTable")
     public Map<String, String> solve(@RequestBody Map<String, Object> body) {
@@ -522,20 +522,21 @@ public class TimeTableController {
         }
         return null;
     }
-    Map<String,String> checkCourseRoomProfSlot(Map<String,String> errorMap,Map<String,Lesson> subMap, String[][][] courseCodes,String[][][] roomCodes)
-    {
-        
+
+    Map<String, String> checkCourseRoomProfSlot(Map<String, String> errorMap, Map<String, Lesson> subMap,
+            String[][][] courseCodes, String[][][] roomCodes) {
+
         for (int i = 0; i < courseCodes.length; i++) {
             for (int j = 0; j < courseCodes[0].length; j++) {
-                
+
                 String key = Integer.toString(i) + "," + Integer.toString(j);
                 HashMap<String, String> codeHashMap = new HashMap<>();
                 HashMap<String, String> roomHashMap = new HashMap<>();
                 HashMap<String, String> profHashMap = new HashMap<>();
-                for (int k=0;k<courseCodes[i][j].length;k++) {
-                    
-                    String courseCode=courseCodes[i][j][k];
-                    String roomCode=roomCodes[i][j][k];
+                for (int k = 0; k < courseCodes[i][j].length; k++) {
+
+                    String courseCode = courseCodes[i][j][k];
+                    String roomCode = roomCodes[i][j][k];
                     // System.out.println(courseCode[0]);
                     if (courseCode.strip().length() == 0) {
                         continue;
@@ -546,32 +547,38 @@ public class TimeTableController {
                     }
                     if (codeHashMap.containsKey(tmp.getSubject())) {
                         if (!errorMap.containsKey(key))
-                            errorMap.put(key, "Course Common: " + codeHashMap.get(tmp.getSubject()) + "-" + courseCode+":"+roomCode);
+                            errorMap.put(key, "Course Common: " + codeHashMap.get(tmp.getSubject()) + "-" + courseCode
+                                    + ":" + roomCode);
                         else
                             errorMap.put(key,
-                                    errorMap.get(key) + ", Course Common: " + codeHashMap.get(tmp.getSubject()) + "-" + courseCode+":"+roomCode);
+                                    errorMap.get(key) + ", Course Common: " + codeHashMap.get(tmp.getSubject()) + "-"
+                                            + courseCode + ":" + roomCode);
                     } else {
-                        codeHashMap.put(tmp.getSubject(), courseCode+":"+roomCode);
+                        codeHashMap.put(tmp.getSubject(), courseCode + ":" + roomCode);
                     }
 
                     if (roomHashMap.containsKey(roomCode.strip())) {
                         if (!errorMap.containsKey(key))
-                            errorMap.put(key, "Room Common: " + roomHashMap.get(roomCode.strip()) + "-" + courseCode+":"+roomCode);
+                            errorMap.put(key, "Room Common: " + roomHashMap.get(roomCode.strip()) + "-" + courseCode
+                                    + ":" + roomCode);
                         else
-                            errorMap.put(key, errorMap.get(key) + ", Room Common: " + roomHashMap.get(roomCode.strip()) + "-"
-                                    + courseCode+":"+roomCode);
+                            errorMap.put(key,
+                                    errorMap.get(key) + ", Room Common: " + roomHashMap.get(roomCode.strip()) + "-"
+                                            + courseCode + ":" + roomCode);
                     } else {
-                        roomHashMap.put(roomCode.strip(), courseCode+":"+roomCode);
+                        roomHashMap.put(roomCode.strip(), courseCode + ":" + roomCode);
                     }
 
                     if (profHashMap.containsKey(tmp.getTeacher())) {
                         if (!errorMap.containsKey(key))
-                            errorMap.put(key, "Prof Common: " + profHashMap.get(tmp.getTeacher()) + "-" + courseCode+":"+roomCode);
+                            errorMap.put(key, "Prof Common: " + profHashMap.get(tmp.getTeacher()) + "-" + courseCode
+                                    + ":" + roomCode);
                         else
                             errorMap.put(key,
-                                    errorMap.get(key) + ", Prof Common: " + profHashMap.get(tmp.getTeacher()) + "-" + courseCode+":"+roomCode);
+                                    errorMap.get(key) + ", Prof Common: " + profHashMap.get(tmp.getTeacher()) + "-"
+                                            + courseCode + ":" + roomCode);
                     } else {
-                        profHashMap.put(tmp.getTeacher(), courseCode+":"+roomCode);
+                        profHashMap.put(tmp.getTeacher(), courseCode + ":" + roomCode);
                     }
 
                 }
@@ -579,48 +586,36 @@ public class TimeTableController {
 
             // System.out.println(mpp.values());
         }
-        
-        
+
         return null;
 
     }
-    void checkSameDaySameSubject(String[][][] courseCodes,Map<String,String> errMap)
-    {
-        for(int i=0;i<courseCodes.length;i++)
-        {
-            HashMap<String,Integer> courseCodeFreq=new HashMap<>();
-            for(int j=0;j<courseCodes[i].length;j++)
-            {
-                for(int k=0;k<courseCodes[i][j].length;k++)
-                {
-                    String courseCode=courseCodes[i][j][k];
-                    if(courseCode.strip().length()==0)
-                    {
+
+    void checkSameDaySameSubject(String[][][] courseCodes, Map<String, String> errMap) {
+        for (int i = 0; i < courseCodes.length; i++) {
+            HashMap<String, Integer> courseCodeFreq = new HashMap<>();
+            for (int j = 0; j < courseCodes[i].length; j++) {
+                for (int k = 0; k < courseCodes[i][j].length; k++) {
+                    String courseCode = courseCodes[i][j][k];
+                    if (courseCode.strip().length() == 0) {
                         continue;
                     }
-                    if(courseCodeFreq.containsKey(courseCode))
-                    {
-                        courseCodeFreq.put(courseCode, courseCodeFreq.get(courseCode)+1);
-                    }
-                    else
-                    {
+                    if (courseCodeFreq.containsKey(courseCode)) {
+                        courseCodeFreq.put(courseCode, courseCodeFreq.get(courseCode) + 1);
+                    } else {
                         courseCodeFreq.put(courseCode, 1);
                     }
                 }
 
             }
-            for(String key:courseCodeFreq.keySet())
-            {
-                
-                if(courseCodeFreq.get(key)>3)
-                {
-                    if(!errMap.containsKey(String.valueOf(i)))
-                    {
-                        errMap.put(String.valueOf(i), "Course "+key+" is more than 1 time in a day");
-                    }
-                    else
-                    {
-                        errMap.put(String.valueOf(i), errMap.get(String.valueOf(i))+" ,Course "+key+" is more than 3 times in a day");
+            for (String key : courseCodeFreq.keySet()) {
+
+                if (courseCodeFreq.get(key) > 3) {
+                    if (!errMap.containsKey(String.valueOf(i))) {
+                        errMap.put(String.valueOf(i), "Course " + key + " is more than 1 time in a day");
+                    } else {
+                        errMap.put(String.valueOf(i),
+                                errMap.get(String.valueOf(i)) + " ,Course " + key + " is more than 3 times in a day");
                     }
 
                     // System.out.println(key+" "+courseCodeFreq.get(key));
@@ -631,35 +626,29 @@ public class TimeTableController {
 
     }
 
-    void checkSlotClash(String[][][] courseCodes,Map<String,String> errMap)
-    {
+    void checkSlotClash(String[][][] courseCodes, Map<String, String> errMap) {
         for (int i = 0; i < courseCodes.length; i++) {
             for (int j = 0; j < courseCodes[i].length; j++) {
-                HashSet<String> courseCodeSet=new HashSet<>();
+                HashSet<String> courseCodeSet = new HashSet<>();
                 for (int j2 = 0; j2 < courseCodes[i][j].length; j2++) {
-                    if(courseCodes[i][j][j2].strip().length()==0)
-                    {
+                    if (courseCodes[i][j][j2].strip().length() == 0) {
                         continue;
                     }
                     courseCodeSet.add(courseCodes[i][j][j2]);
                 }
-                String result=checkBucketClash(courseCodeSet, 2);
-                if(result!="No clash")
-                {
+                String result = checkBucketClash(courseCodeSet, 2);
+                if (result != "No clash") {
                     String key = Integer.toString(i) + "," + Integer.toString(j);
-                    if(!errMap.containsKey(key))
-                    {
+                    if (!errMap.containsKey(key)) {
                         errMap.put(key, "Slot violates regulation" + result);
-                    }
-                    else
-                    {
-                        errMap.put(key, errMap.get(key)+" ,Slot violates regulation" +result);
+                    } else {
+                        errMap.put(key, errMap.get(key) + " ,Slot violates regulation" + result);
                     }
                 }
             }
         }
     }
-    
+
     @CrossOrigin(maxAge = 3600)
     @PostMapping("/checkTimeTable")
     // @JsonProperty(value = "timetable")
@@ -690,30 +679,28 @@ public class TimeTableController {
         for (Lesson c : subjectList) {
             subMap.put(c.getSubject(), c);
         }
-        String[][][] courseCodes=new String[5][12][];
-        String[][][] roomCodes=new String[5][12][];
-        for(int i=0;i<5;i++){
-            for(int j=0;j<12;j++){
+        String[][][] courseCodes = new String[5][12][];
+        String[][][] roomCodes = new String[5][12][];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 12; j++) {
 
                 String[] arrOfStr = ttvalues[i][j].split("\n");
-                courseCodes[i][j]=new String[arrOfStr.length];
-                roomCodes[i][j]=new String[arrOfStr.length];
-                for(int k=0;k<arrOfStr.length;k++){
-                    if(arrOfStr[k].strip().length()<3)
-                    {
+                courseCodes[i][j] = new String[arrOfStr.length];
+                roomCodes[i][j] = new String[arrOfStr.length];
+                for (int k = 0; k < arrOfStr.length; k++) {
+                    if (arrOfStr[k].strip().length() < 3) {
                         continue;
                     }
                     String[] courseCode = arrOfStr[k].split(":");
-                    courseCodes[i][j][k]=courseCode[0].strip();
-                    roomCodes[i][j][k]=courseCode[1].strip();
+                    courseCodes[i][j][k] = courseCode[0].strip();
+                    roomCodes[i][j][k] = courseCode[1].strip();
                 }
             }
         }
-        checkCourseRoomProfSlot(map,subMap,courseCodes,roomCodes);
-        checkSameDaySameSubject(courseCodes,map);
-        checkSlotClash(courseCodes,map);
+        checkCourseRoomProfSlot(map, subMap, courseCodes, roomCodes);
+        checkSameDaySameSubject(courseCodes, map);
+        checkSlotClash(courseCodes, map);
 
-        
         for (String objectName : map.keySet()) {
             System.out.println(objectName + "-> " + map.get(objectName));
         }

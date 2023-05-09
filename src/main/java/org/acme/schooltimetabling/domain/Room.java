@@ -10,7 +10,8 @@ import org.optaplanner.core.api.domain.lookup.PlanningId;
 public class Room {
 
     @PlanningId
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
 
     private String name;
@@ -20,13 +21,13 @@ public class Room {
     public Room() {
     }
 
-    public Room(String name,int capacity) {
+    public Room(String name, int capacity) {
         this.name = name;
         this.capacity = capacity;
     }
 
-    public Room(long id, String name,int capacity) {
-        this(name,capacity);
+    public Room(long id, String name, int capacity) {
+        this(name, capacity);
         this.id = id;
         // this.capacity = capacity;
     }
@@ -43,6 +44,7 @@ public class Room {
     public Long getId() {
         return id;
     }
+
     public int getCapacity() {
         return capacity;
     }
