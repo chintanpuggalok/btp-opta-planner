@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.optaplanner.core.api.score.buildin.hardmediumsoft.HardMediumSoftScore;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintCollectors;
@@ -83,10 +84,10 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
 
         Constraint[] otherConstraints= new Constraint[] {
                 // Hard constraints
+                sameTimeslotSubjectSetConstraint(constraintFactory),
                 roomConflict(constraintFactory),
                 teacherConflict(constraintFactory),
                 noCourseRepeatOnSameDay(constraintFactory),
-                sameTimeslotSubjectSetConstraint(constraintFactory),
                 sameSubjectDifferentSectionConstraint(constraintFactory),
                 roomCapacityConstraint(constraintFactory),
                 maxLessonsPerTimeslot(constraintFactory, 9),
@@ -96,7 +97,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "other", 4),
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "math", 3),
                 maxLessonsPerDepartmentPerTimeslot(constraintFactory, "des", 2),
-                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "bio", 2),
+                maxLessonsPerDepartmentPerTimeslot(constraintFactory, "bio", 3),
                 // avoidHighStrengthLessonsInSameTimeSlot(constraintFactory),
                 // minLessonsPerTimeslot(constraintFactory, 7),
 
@@ -154,7 +155,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         )
                 .filter((lesson1, lesson2) -> lesson1.getMultipleSection() && lesson2.getMultipleSection())
                 .filter((lesson1, lesson2) -> !lesson1.getTimeslot().equals(lesson2.getTimeslot()))
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same subject different teacher constraint");
+                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same subject different section constraint");
     }
 
     private Constraint roomCapacityConstraint(ConstraintFactory factory) {
@@ -205,8 +206,9 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .join(Lesson.class,
                         Joiners.equal(Lesson::getTimeslot),
                         Joiners.lessThan(Lesson::getId))
+                .filter((lesson1, lesson2) -> !lesson1.getSubject().equals(lesson2.getSubject()))
                 .filter((lesson1, lesson2) -> areSubjectsInSameSet(lesson1.getSubject(), lesson2.getSubject()))
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same timeslot subject set constraint1");
+                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same timeslot subject set constraint");
     }
 
     private boolean areSubjectsInSameSet(String subject1, String subject2) {

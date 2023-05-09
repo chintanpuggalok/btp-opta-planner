@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -88,6 +89,7 @@ public class TimeTableController {
                 subjectData.put(subjectDetails[0], subjectDataList);
             }
 
+            Random rand = new Random();
             for (String subjectCode : subjectData.keySet()) {
                 if (subjectData.get(subjectCode).size() == 1) {
                     String[] subjectDetails = subjectData.get(subjectCode).get(0);
@@ -126,9 +128,9 @@ public class TimeTableController {
                         dept = "des";
                     else
                         dept = "other";
-                    char section = 'A';
+                    // char section = 'A';
                     for (int i = 0; i < 2; i++) {
-                        String secString = String.valueOf(section + i);
+                        String secString = String.valueOf(rand.nextInt());
                         for (String[] subjectDataArray : subjectDataList) {
                             Lesson subject = new Lesson(subjectDataArray[0], subjectDataArray[2], "",
                                     Integer.valueOf(subjectDataArray[1]), dept, secString);
@@ -182,8 +184,8 @@ public class TimeTableController {
     }
 
     void WriteTT(TimeTable solution) {
-        Lesson[][][] lessons = new Lesson[5][12][9];
-        HashSet<String>[][] occupiedRoomSet = new HashSet[5][12];
+        HashSet<Lesson>[][] lessons = new HashSet[5][4];
+        HashSet<String>[][] occupiedRoomSet = new HashSet[5][4];
         HashSet<String> allRoomSet = new HashSet<>(
                 roomRepository.findAll().stream().map(r -> r.getName()).collect(Collectors.toList()));
         try {
@@ -194,19 +196,32 @@ public class TimeTableController {
                 // System.out.println(slotId);
                 int day = (int) (slotId / 4);
                 int slot = (int) (slotId) % 4;
-                slot = slot * 3;
+                // slot = slot ;
                 int index = 0;
                 // jsonArray.get(day).get(slot).add(l);
-                for (; index < 9 && lessons[day][slot][index] != null; index++)
+                // for (; index < 10 && lessons[day][slot][index] != null; index++)
                     ;
                 // System.out.println("day: "+day+" slot: "+slot+" index: "+index);
                 HashSet<String> occupiedRooms = new HashSet<>();
+                HashSet<Lesson> lessonSlot1=new HashSet<>();
+                // HashSet<Lesson> lessonSlot2=new HashSet<>();
+                // HashSet<Lesson> lessonSlot3=new HashSet<>();
                 if (occupiedRoomSet[day][slot] != null)
                     occupiedRooms = occupiedRoomSet[day][slot];
+                if(lessons[day][slot]!=null)
+                    lessonSlot1=lessons[day][slot];
+                // if(lessons[day][slot+1]!=null)
+                //     lessonSlot2=lessons[day][slot];
+                // if(lessons[day][slot+2]!=null)
+                //     lessonSlot3=lessons[day][slot];
+
                 occupiedRooms.add(l.getRoom().getName());
-                lessons[day][slot][index] = l;
-                lessons[day][slot + 1][index] = l;
-                lessons[day][slot + 2][index] = l;
+                lessonSlot1.add(l);
+                // lessonSlot2.add(l);
+                // lessonSlot3.add(l);
+                lessons[day][slot] = lessonSlot1;
+                // lessons[day][slot+1] = lessonSlot2;
+                // lessons[day][slot+2] = lessonSlot3;
 
             }
         } catch (Exception e) {
@@ -221,15 +236,22 @@ public class TimeTableController {
 
             for (int i = 0; i < lessons.length; i++) {
                 for (int j = 0; j < lessons[0].length; j++) {
-                    int l = lessons[i][j].length;
+                    // int l = lessons[i][j].length;
+                    if(lessons[i][j]==null)
+                    {
+                        for(int k=0;k<10;k++)
+                            sb.append(",");
+                        sb.append("|");
 
-                    for (int p = 0; p < l; p++) {
-                        if (lessons[i][j][p] != null)
-                            if (lessons[i][j][p].getMultipleSection())
-                                sb.append(lessons[i][j][p].getSubject() + "(" + lessons[i][j][p].getSection() + ")"
-                                        + ":" + lessons[i][j][p].getRoom());
+                        continue;
+                    }
+                    for (Lesson lesson : lessons[i][j]) {
+                        if (lesson != null)
+                            if (lesson.getMultipleSection())
+                                sb.append(lesson.getSubject() + "(" + lesson.getSection() + ")"
+                                        + ":" + lesson.getRoom());
                             else
-                                sb.append(lessons[i][j][p].getSubject() + ":" + lessons[i][j][p].getRoom());
+                                sb.append(lesson.getSubject() + ":" + lesson.getRoom());
 
                         sb.append(",");
                     }
@@ -391,7 +413,26 @@ public class TimeTableController {
             solverManager.solveAndListen(TimeTableRepository.SINGLETON_TIME_TABLE_ID,
                     timeTableRepository::findById,
                     (TimeTable t) -> {
+                        System.out.println("Solving");
+                        System.out.println(t.getScore());
+                        timeTableRepository.save(t);
+                        WriteTT(t);
 
+                    });
+            return Map.of("status", "started");
+        } else
+            return Map.of("status", "already started");
+    }
+
+    @CrossOrigin(maxAge = 3600)
+    @GetMapping("/continueSolving")
+    public Map<String, String> continueSolving() {
+        if (getSolverStatus() == SolverStatus.NOT_SOLVING) {
+            solverManager.solveAndListen(TimeTableRepository.SINGLETON_TIME_TABLE_ID,
+                    timeTableRepository::findById,
+                    (TimeTable t) -> {
+                        System.out.println("Solving");
+                        System.out.println(t.getScore());
                         timeTableRepository.save(t);
                         WriteTT(t);
 
