@@ -404,6 +404,14 @@ public class TimeTableController {
 
     }
     @CrossOrigin(maxAge = 3600)
+    @PostMapping("/saveTimeTable")
+    public Map<String, String> save(@RequestBody Map<String, Object> body) {
+        // System.out.println(body);
+        
+            return Map.of("status", "saved");
+        
+    }
+    @CrossOrigin(maxAge = 3600)
     @PostMapping("/createTimeTable")
     public Map<String, String> solve(@RequestBody Map<String, Object> body) {
         // System.out.println(body);
@@ -690,10 +698,10 @@ public class TimeTableController {
         for (Lesson c : subjectList) {
             subMap.put(c.getSubject(), c);
         }
-        String[][][] courseCodes=new String[5][12][];
-        String[][][] roomCodes=new String[5][12][];
+        String[][][] courseCodes=new String[5][4][];
+        String[][][] roomCodes=new String[5][4][];
         for(int i=0;i<5;i++){
-            for(int j=0;j<12;j++){
+            for(int j=0;j<4;j++){
 
                 String[] arrOfStr = ttvalues[i][j].split("\n");
                 courseCodes[i][j]=new String[arrOfStr.length];
