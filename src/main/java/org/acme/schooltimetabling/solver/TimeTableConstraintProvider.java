@@ -1,31 +1,17 @@
 package org.acme.schooltimetabling.solver;
 
-import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.optaplanner.core.api.score.buildin.hardmediumsoft.HardMediumSoftScore;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore;
 import org.optaplanner.core.api.score.stream.Constraint;
 import org.optaplanner.core.api.score.stream.ConstraintCollectors;
 import org.optaplanner.core.api.score.stream.ConstraintFactory;
 import org.optaplanner.core.api.score.stream.ConstraintProvider;
 import org.optaplanner.core.api.score.stream.Joiners;
-import org.optaplanner.core.api.score.stream.bi.BiConstraintCollector;
 import org.optaplanner.core.api.score.stream.uni.UniConstraintCollector;
-import org.optaplanner.core.impl.util.Pair;
-import org.acme.schooltimetabling.TimeTableSpringBootApp;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.time.DayOfWeek;
 
 import org.acme.schooltimetabling.domain.Lesson;
@@ -44,7 +30,6 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
         // subjectSets = TimeTableSpringBootApp.getbucketList();
         // subjectSets.add(Set.of("Math","Chemistry","Biology"));
         // Map<String, Integer> minLessonCount = Map.of("cse",2,"ece",1);
-        setBucketList();
         List<LocalTime> startTimeList = List.of(LocalTime.of(9, 00), LocalTime.of(10, 30), LocalTime.of(12, 00),
                 LocalTime.of(14, 30), LocalTime.of(16, 00));
         List<LocalTime> endTimeList = List.of(LocalTime.of(10, 30), LocalTime.of(12, 00), LocalTime.of(13, 30),
@@ -218,17 +203,6 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 .asConstraint("Teacher conflict");
     }
 
-    private Constraint sameSubjectDifferentSectionConstraint(ConstraintFactory factory) {
-        return factory.forEachUniquePair(Lesson.class,
-                Joiners.equal(Lesson::getSubject),
-                Joiners.equal(Lesson::getSection)
-
-        )
-                .filter((lesson1, lesson2) -> lesson1.getMultipleSection() && lesson2.getMultipleSection())
-                .filter((lesson1, lesson2) -> !lesson1.getTimeslot().equals(lesson2.getTimeslot()))
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same subject different section constraint");
-    }
-
     private Constraint roomCapacityConstraint(ConstraintFactory factory) {
         return factory.forEach(Lesson.class)
                 .filter(lesson -> lesson.getRoom() != null && lesson.getStrength() != null)
@@ -275,17 +249,6 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                 Joiners.equal(Lesson::getTeacher))
                 .filter((lesson1, lesson2) -> areSubjectsInSameSet(lesson1.getSubject(), lesson2.getSubject()))
                 .penalize(HardSoftScore.ONE_HARD).asConstraint("No course repeat on same day");
-    }
-
-    private Constraint sameTimeslotSubjectSetConstraint(ConstraintFactory factory) {
-        return factory.forEach(Lesson.class)
-                .filter(lesson -> lesson.getTimeslot() != null && lesson.getSubject() != null)
-                .join(Lesson.class,
-                        Joiners.equal(Lesson::getTimeslot),
-                        Joiners.lessThan(Lesson::getId))
-                .filter((lesson1, lesson2) -> !lesson1.getSubject().equals(lesson2.getSubject()))
-                .filter((lesson1, lesson2) -> areSubjectsInSameSet(lesson1.getSubject(), lesson2.getSubject()))
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same timeslot subject set constraint");
     }
 
     private boolean areSubjectsInSameSet(String subject1, String subject2) {
