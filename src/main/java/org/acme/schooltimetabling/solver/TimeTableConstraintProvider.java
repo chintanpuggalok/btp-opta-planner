@@ -83,7 +83,7 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
 
         Constraint[] otherConstraints = new Constraint[] {
                 // Hard constraints
-                sameTimeslotSubjectSetConstraint(constraintFactory),
+                // sameTimeslotSubjectSetConstraint(constraintFactory),
                 roomConflict(constraintFactory),
                 teacherConflict(constraintFactory),
                 noCourseRepeatOnSameDay(constraintFactory),
@@ -162,7 +162,8 @@ public class TimeTableConstraintProvider implements ConstraintProvider {
                         Joiners.lessThan(Lesson::getId))
                 .filter((lesson1, lesson2) -> !lesson1.getSubject().equals(lesson2.getSubject()))
                 .filter((lesson1, lesson2) -> areSubjectsInSameSet(lesson1.getSubject(), lesson2.getSubject()))
-                .penalize(HardSoftScore.ONE_HARD).asConstraint("Same timeslot subject set constraint");
+                .penalize(HardSoftScore.ONE_HARD)
+                .asConstraint("Same timeslot subject set constraint");
     }
 
     private Constraint ensureSubjectRoomIsSamePenalty(ConstraintFactory constraintFactory) {
