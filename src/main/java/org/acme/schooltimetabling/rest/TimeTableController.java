@@ -408,10 +408,43 @@ public class TimeTableController {
     }
     @CrossOrigin(maxAge = 3600)
     @PostMapping("/saveTimeTable")
-    public Map<String, String> save(@RequestBody Map<String, Object> body) {
+    public Map<String, String> save(@RequestBody String timetable) {
         // System.out.println(body);
-        
+        Gson gson = new Gson();
+        HashMap<String, ArrayList<ArrayList<String>>> temp2 = gson.fromJson(timetable, HashMap.class);
+        // System.out.println(timetable);
+        // JSONArray t = new JSONArray(timetable.get("timetable"));
+        ArrayList<ArrayList<String>> tempt = temp2.get("timetable");
+        String[][] ttvalues = tempt.stream().map(u -> u.toArray(new String[0])).toArray(String[][]::new);
+        StringBuilder sb = new StringBuilder();
+        for(int i=0;i<5;i++){
+            for(int j=0;j<4;j++){
+
+                String[] arrOfStr = ttvalues[i][j].split("\n");
+                for(int k=0;k<arrOfStr.length;k++){
+                    if(arrOfStr[k].strip().length()<3)
+                    {
+                        continue;
+                    }
+                    // String[] courseCode = arrOfStr[k].split(":");
+                    sb.append(arrOfStr[k].strip());
+                    sb.append(",");
+                    
+                }
+                sb.append("|");
+            }
+            sb.append("\n");
+        }
+        try {
+            BufferedWriter bWriter = new BufferedWriter(new FileWriter("finalTT.csv"));
+            bWriter.write(sb.toString());
+            bWriter.close();
             return Map.of("status", "saved");
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.out.println(e);
+        }
+        return Map.of("status", "error");
         
     }
     @CrossOrigin(maxAge = 3600)
