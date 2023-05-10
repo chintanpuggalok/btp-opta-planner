@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -245,14 +246,16 @@ public class TimeTableController {
 
                         continue;
                     }
-                    for (Lesson lesson : lessons[i][j]) {
-                        if (lesson != null)
-                            if (lesson.getMultipleSection())
-                                sb.append(lesson.getSubject() + "(" + lesson.getSection() + ")"
-                                        + ":" + lesson.getRoom());
-                            else
-                                sb.append(lesson.getSubject() + ":" + lesson.getRoom());
-
+                    ArrayList<String> subjectStrings=new ArrayList<>();
+                    for(Lesson lesson:lessons[i][j])
+                    {
+                        
+                        subjectStrings.add(lesson.getSubject() + ":" + lesson.getRoom());
+                    }
+                    Collections.sort(subjectStrings);
+                    
+                    for (String lesson : subjectStrings) {
+                        sb.append(lesson);
                         sb.append(",");
                     }
                     // if (j != lessons[0].length - 1)
@@ -620,7 +623,7 @@ public class TimeTableController {
             for(String key:courseCodeFreq.keySet())
             {
                 
-                if(courseCodeFreq.get(key)>3)
+                if(courseCodeFreq.get(key)>1)
                 {
                     if(!errMap.containsKey(String.valueOf(i)))
                     {
