@@ -1,34 +1,75 @@
-subject,registration,prof
-BIO101,30,Sriram K.,
-CSE102,298,Piyus Kedia,
-CSE102,321,Subhabrata Samajder,
-CSE112,298,Sujay Deb,
-CSE112,321,Tammam Tillo,
-CSE140,42,Jainendra Shukla,
-DES101,33,Anoop Ratn (V),
-DES202,33,Anoop Ratn (V),
-ECE113,158,Ram Krishna Ghosh,
-MTH201,298,Sanjit Kaul,
-MTH201,298,Subhajit Ghosechowdhury (L),
-SOC101,30,Paro Mishra,
-ECO223,33,Kiriti Kanjilal,
-SSH101,33,Praveen Priyadarshi
-BIO213,96,Jaspreet Kaur
-BIO221,110,Tavpritesh Sethi
-CSE202,195,Vikram Goyal
-CSE202,200,Mukesh Mohania
-CSE222,233,Diptapriyo Majumdar
-CSE222,234,Debarka Sengupta
-DES205,69,Dhurjati Majumdar (PoP)
-DES206,153,Anmol Srivastava
-ECE214,91,Abhijit Mitra
-ECE230,107,Sayak Bhattacharya
-ECE240,87,Ranjitha P
-MTH204,177,Sneha Chaubey
-MTH204,178,Ashish Kumar Pandey
-MTH212,77,Krishanu Roy (L)
-ECO333,86,Souvik Dutta
-ECO221,104,Gaurav Arora
-SOC207,157,Amrit Srinivasan (V)
-SOC210,28,Gayatri Nair
-SSH215,30,Payel C Mukherjee (V)
+CourseCode,registration,Professor
+BIO361,62,Arjun Ray
+BIO523,3,N. Arul Murugan
+BIO321,42,Debarka Sengupta
+BIO542,201,G.P.S. Raghava
+BIO532,23,Ganesh Bagler
+BIO544,139,Ganesh Bagler
+BIO511,91,Sriram K.
+BIO546,101,Tavpritesh Sethi
+BIO512,36,Vibhor Kumar
+CSE232,237,Mukulika Maity
+CSE232,145,Rinku Shah
+CSE340,62,A V Subramanyam
+CSE340,74,Angshul Majumdar
+CSE345,167,Arun Balaji Buduru
+CSE643,366,C. Anantaram (V)
+CSE525,127,Debajyoti Bera
+CSE319,13,Diptapriyo Majumdar
+CSE343,148,Jainendra Shukla
+CSE343,126,Vinayak Abrol
+CSE556,132,Md. Shad Akhtar
+CSE656,45,Mukesh Mohania
+CSE333,47,Ojaswa Sharma
+CSE301,17,Piyus Kedia
+CSE642 ,27,Saket Anand
+CSE546,11,Subhabrata Samajder
+ECE511,102,Sujay Deb
+CSE529,11,Syamantak Das
+CSE506,160,Vikram Goyal
+CSE513,16,Vivek Kumar
+ECE340,31,Abhijit Mitra
+ECE546,14,Anand Srivastava
+ECE314,61,Anuj Grover
+ECE501,27,Chanekar Prasad Vilas
+ECE315,50,Rakesh Pilani (G)
+ECE565,13,Prabhat Munshi (V)
+ECE351,75,Manuj Mukherjee
+ECE560,49,Pravesh Biyani
+ECE524,20,Ram Krishna Ghosh
+ECE551,19,Ranjitha Prasad
+ECE522,23,S.S. Jamuar
+ECE570,21,Sanat K Biswas
+ECE564,21,Sanjit Kaul
+ECE525,10,Sayak Bhattacharya
+CSE633,17,Sayan Basu Roy
+ECE318,71,Sneh Saurabh
+ECE539,11,Vivek Ashok Bohara
+DES514,39,Aman Samuel (V)
+DES302,82,Anoop Ratn (V)
+DES305,33,Anoop Ratn (V)
+DES509,27,Grace Eden
+MTH518,6,Anuradha Sharma
+MTH341,9,Ashish Kumar Pandey
+MTH373,100,Kaushik Kalyanaraman
+MTH371,85,Monika Arora
+MTH571,3,Sarthok Sircar
+MTH340,10,Subhashree Mohapatra
+SSH700,10,Aasim Khan, Praveen Priyadarshi, Nishad Patnaik and Manohar Kumar
+ENT412,21,Anupam Saronwala (V)
+ECO324,9,Gaurav Arora
+SOC314,44,Gayatri Nair
+ECO311,49,Kiriti Kanjilal
+PSY307,182,Mrinmoy Chakrabarty
+SSH322,31,Nishad Patnaik
+ECO331,243,Pankaj Vajpayee
+SOC513,6,Paro Mishra
+SSH362,136,Praveen Priyadarshi
+ECO502,16,Rakesh Chaturvedi
+SOC308,43,Smriti Singh
+PSY308,111,Sonia Baloni Ray
+ECO301,73,Souvik Dutta
+CSE600A,208,Pushpendra Singh
+CSE569,240,Dhruv Kumar
+DES524,49,Dhurjati Majumdar
+BIO5xx,17,Tarini Shankar Ghosh 

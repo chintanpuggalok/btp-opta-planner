@@ -67,11 +67,18 @@ public class TimeTableController {
     static List<Lesson> getSubjects(ArrayList<HashMap<String, Object>> inputSubjectList) {
         String line = "";
         String splitBy = ",";
+        List<Set<String>> bucketListFinal = new ArrayList<>();
+        List<String> courses1Y = new ArrayList<>(List.of("BIO101", "CSE102", "CSE112", "CSE140", "DES101", "DES202",
+                "ECE113", "MTH201", "SOC101", "ECO223", "SSH101"));
+        List<String> courses2Y = new ArrayList<>(List.of("BIO213", "BIO221", "CSE202", "CSE222", "DES205", "DES206",
+                "ECE214", "ECE230", "ECE240", "MTH204", "MTH212", "ECO333", "ECO221", "SOC207", "SOC210", "SSH215"));
+
+        List<String> weekfreq3 = new ArrayList<>(List.of("BIO101", "CSE140", "ECE113", "MTH201"));
         // ArrayList<String[]> subjectData=new ArrayList<>();
         HashMap<String, ArrayList<String[]>> subjectData = new HashMap<>();
         ArrayList<Lesson> subjectList = new ArrayList<>();
         try {
-            BufferedWriter courseListWriter = new BufferedWriter(new FileWriter("courseList.csv"));
+            BufferedWriter courseListWriter = new BufferedWriter(new FileWriter("coursecodes.csv"));
             StringBuilder courseListSb = new StringBuilder();
             courseListSb.append("CourseCode,registration,Professor\n");
             for (HashMap<String, Object> subject : inputSubjectList) {
@@ -106,9 +113,22 @@ public class TimeTableController {
                         dept = "des";
                     else
                         dept = "other";
-                    Lesson subject = new Lesson(subjectDetails[0], subjectDetails[2], "",
+                    String tempGroup = "";
+                    if (courses1Y.contains(subjectCode)) {
+                        tempGroup = "Year 1";
+                    } else if (courses2Y.contains(subjectCode)) {
+                        tempGroup = "Year 2";
+                    } else {
+                        tempGroup = "UG/PG";
+                    }
+                    if (weekfreq3.contains(subjectCode)) {
+                        Lesson subject3 = new Lesson(subjectDetails[0], subjectDetails[2], tempGroup,
+                                Integer.valueOf(subjectDetails[1]), dept);
+                        subjectList.add(subject3);
+                    }
+                    Lesson subject = new Lesson(subjectDetails[0], subjectDetails[2], tempGroup,
                             Integer.valueOf(subjectDetails[1]), dept);
-                    Lesson subjectDup = new Lesson(subjectDetails[0], subjectDetails[2], "",
+                    Lesson subjectDup = new Lesson(subjectDetails[0], subjectDetails[2], tempGroup,
                             Integer.valueOf(subjectDetails[1]), dept);
                     subjectList.add(subject);
                     subjectList.add(subjectDup);
@@ -128,11 +148,23 @@ public class TimeTableController {
                         dept = "des";
                     else
                         dept = "other";
-                    // char section = 'A';
+                    char section = 'A';
+                    int j = 2;
+                    String tempGroup = "";
+                    if (courses1Y.contains(subjectCode)) {
+                        tempGroup = "Year 1";
+                    } else if (courses2Y.contains(subjectCode)) {
+                        tempGroup = "Year 2";
+                    } else {
+                        tempGroup = "UG/PG";
+                    }
+                    if ((weekfreq3.contains(subjectCode))) {
+                        j = 3;
+                    }
                     for (int i = 0; i < 2; i++) {
                         String secString = String.valueOf(rand.nextInt());
                         for (String[] subjectDataArray : subjectDataList) {
-                            Lesson subject = new Lesson(subjectDataArray[0], subjectDataArray[2], "",
+                            Lesson subject = new Lesson(subjectDataArray[0], subjectDataArray[2], tempGroup,
                                     Integer.valueOf(subjectDataArray[1]), dept, secString);
                             subjectList.add(subject);
                         }
@@ -165,7 +197,7 @@ public class TimeTableController {
     // To try, GET http://localhost:8080/timeTable
     void readCourseList() {
         try {
-            BufferedReader courseListReader = new BufferedReader(new FileReader("courseList.csv"));
+            BufferedReader courseListReader = new BufferedReader(new FileReader("coursecodes.csv"));
             String line = courseListReader.readLine();
             while ((line = courseListReader.readLine()) != null) {
                 String[] subjectDetails = line.split(",");
