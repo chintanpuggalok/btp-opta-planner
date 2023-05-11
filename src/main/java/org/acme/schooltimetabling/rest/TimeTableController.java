@@ -216,8 +216,8 @@ public class TimeTableController {
     }
 
     void WriteTT(TimeTable solution) {
-        HashSet<Lesson>[][] lessons = new HashSet[5][4];
-        HashSet<String>[][] occupiedRoomSet = new HashSet[5][4];
+        HashSet<Lesson>[][] lessons = new HashSet[5][5];
+        HashSet<String>[][] occupiedRoomSet = new HashSet[5][5];
         HashSet<String> allRoomSet = new HashSet<>(
                 roomRepository.findAll().stream().map(r -> r.getName()).collect(Collectors.toList()));
         try {
@@ -226,8 +226,8 @@ public class TimeTableController {
                     continue;
                 long slotId = l.getTimeslot().getId() - 1;
                 // System.out.println(slotId);
-                int day = (int) (slotId / 4);
-                int slot = (int) (slotId) % 4;
+                int day = (int) (slotId / 5);
+                int slot = (int) (slotId) % 5;
                 // slot = slot ;
                 int index = 0;
                 // jsonArray.get(day).get(slot).add(l);
@@ -263,8 +263,11 @@ public class TimeTableController {
 
         try {
             BufferedWriter bWriter = new BufferedWriter(new FileWriter("finalTT.csv"));
-
+            BufferedWriter bWriter1 = new BufferedWriter(new FileWriter("finalTT_1.csv"));
+            BufferedWriter bWriter2 = new BufferedWriter(new FileWriter("finalTT_2.csv"));
             StringBuilder sb = new StringBuilder();
+            StringBuilder sb1 = new StringBuilder();
+            StringBuilder sb2 = new StringBuilder();
 
             for (int i = 0; i < lessons.length; i++) {
                 for (int j = 0; j < lessons[0].length; j++) {
@@ -277,21 +280,48 @@ public class TimeTableController {
                         continue;
                     }
                     for (Lesson lesson : lessons[i][j]) {
-                        if (lesson != null)
-                            if (lesson.getMultipleSection())
-                                sb.append(lesson.getSubject() + "(" + lesson.getSection() + ")"
-                                        + ":" + lesson.getRoom());
-                            else
-                                sb.append(lesson.getSubject() + ":" + lesson.getRoom());
+                        if (lesson != null) {
+                            if (lesson.getMultipleSection()) {
+                                if (lesson.getStudentGroup() == "Year 1")
+                                    sb1.append(lesson.getSubject() + "(" + lesson.getSection() + ")"
+                                            + ":" + lesson.getRoom() + ":" + lesson.getStudentGroup());
+                                if (lesson.getStudentGroup() == "Year 2")
+                                    sb2.append(lesson.getSubject() + "(" + lesson.getSection() + ")"
+                                            + ":" + lesson.getRoom() + ":" + lesson.getStudentGroup());
+                                if (lesson.getStudentGroup() == "UG/PG")
+                                    sb.append(lesson.getSubject() + "(" + lesson.getSection() + ")"
+                                            + ":" + lesson.getRoom() + ":" + lesson.getStudentGroup());
+                            }
+                        } else {
+                            if (lesson.getStudentGroup() == "Year 1")
+                                sb1.append(
+                                        lesson.getSubject() + ":" + lesson.getRoom() + ":" + lesson.getStudentGroup());
+                            if (lesson.getStudentGroup() == "Year 2")
+                                sb2.append(
+                                        lesson.getSubject() + ":" + lesson.getRoom() + ":" + lesson.getStudentGroup());
+                            if (lesson.getStudentGroup() == "UG/PG")
+                                sb.append(
+                                        lesson.getSubject() + ":" + lesson.getRoom() + ":" + lesson.getStudentGroup());
+                        }
 
                         sb.append(",");
+                        sb1.append(",");
+                        sb2.append(",");
                     }
                     // if (j != lessons[0].length - 1)
                     sb.append("|");
+                    sb1.append("|");
+                    sb2.append("|");
                 }
-                if (i != 4)
+                if (i != 5)
                     sb.append("\n");
+                sb1.append("\n");
+                sb2.append("\n");
             }
+            bWriter1.write(sb1.toString());
+            bWriter1.close();
+            bWriter2.write(sb2.toString());
+            bWriter2.close();
             bWriter.write(sb.toString());
             bWriter.close();
 
